@@ -1,5 +1,12 @@
 opam-version: "2.0"
+maintainer: "Yuki Tajiri <lmdexpr@gmail.com>"
+authors: "Yuki Tajiri"
+license: "MIT"
+homepage: "https://github.com/lmdexpr/ocaml_jvm"
+bug-reports: "https://github.com/lmdexpr/ocaml_jvm/issues"
 depends: [
   "merlin"
   "dune"
+  "stdint"
 ]
+synopsis: "JVM implementation"
