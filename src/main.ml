@@ -5,7 +5,7 @@ let () =
   Arg.parse spec (fun f -> class_file := f) "ocaml-jvm <class_file>";
   let ic = open_in !class_file in
   try 
-    Reader.read_class_file ic;
+    Classfile.read ic |> Classfile.debug_print;
     close_in ic
   with e ->
     close_in_noerr ic;
