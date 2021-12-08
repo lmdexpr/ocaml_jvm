@@ -3,40 +3,55 @@
 ## now
 ```
  ❯ dune exec ocaml_jvm java_src/HelloWorld.class
-0xcafebabe
-0x0
-0x34
-0x1d
-constant_pool {
-  C_methodref 15 6
-  C_fieldref 17 16
-  C_string 18
-  C_methodref 20 19
-  C_class 21
-  C_class 22
-  C_utf8 6 <init>
-  C_utf8 3 ()V
-  C_utf8 4 Code
-  C_utf8 15 LineNumberTable
-  C_utf8 4 main
-  C_utf8 22 ([Ljava/lang/String;)V
-  C_utf8 10 SourceFile
-  C_utf8 15 HelloWorld.java
-  C_name_and_type 8 7
-  C_class 23
-  C_name_and_type 25 24
-  C_utf8 12 Hello,world.
-  C_class 26
-  C_name_and_type 28 27
-  C_utf8 10 HelloWorld
-  C_utf8 16 java/lang/Object
-  C_utf8 16 java/lang/System
-  C_utf8 3 out
-  C_utf8 21 Ljava/io/PrintStream;
-  C_utf8 19 java/io/PrintStream
-  C_utf8 7 println
-  C_utf8 21 (Ljava/lang/String;)V
-}
+magic : 0xcafebabe
+minor_version : 0x0
+major_version : 0x34
+constant_pool_count : 0x1d
+constant_pool [
+  methodref 15 6
+  fieldref 17 16
+  string 18
+  methodref 20 19
+  class 21
+  class 22
+  utf8 6 <init>
+  utf8 3 ()V
+  utf8 4 Code
+  utf8 15 LineNumberTable
+  utf8 4 main
+  utf8 22 ([Ljava/lang/String;)V
+  utf8 10 SourceFile
+  utf8 15 HelloWorld.java
+  name_and_type 8 7
+  class 23
+  name_and_type 25 24
+  utf8 12 Hello,world.
+  class 26
+  name_and_type 28 27
+  utf8 10 HelloWorld
+  utf8 16 java/lang/Object
+  utf8 16 java/lang/System
+  utf8 3 out
+  utf8 21 Ljava/io/PrintStream;
+  utf8 19 java/io/PrintStream
+  utf8 7 println
+  utf8 21 (Ljava/lang/String;)V
+]
+access_flags : 0x21
+this_class : 0x5
+super_class : 0x6
+interfaces_count : 0
+interfaces : [
+]
+fields_count : 0
+fields : [
+]
+methods_count : 2
+methods [
+]
+attributes_count : 1
+attributes [
+]
 
  ❯ xxd java_src/HelloWorld.class
 00000000: cafe babe 0000 0034 001d 0a00 0600 0f09  .......4........
