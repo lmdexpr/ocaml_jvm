@@ -7,35 +7,35 @@ magic : 0xcafebabe
 minor_version : 0x0
 major_version : 0x34
 constant_pool_count : 0x1d
-constant_pool [
-  methodref 15 6
-  fieldref 17 16
-  string 18
-  methodref 20 19
-  class 21
-  class 22
-  utf8 6 <init>
-  utf8 3 ()V
-  utf8 4 Code
-  utf8 15 LineNumberTable
-  utf8 4 main
-  utf8 22 ([Ljava/lang/String;)V
-  utf8 10 SourceFile
-  utf8 15 HelloWorld.java
-  name_and_type 8 7
-  class 23
-  name_and_type 25 24
-  utf8 12 Hello,world.
-  class 26
-  name_and_type 28 27
-  utf8 10 HelloWorld
-  utf8 16 java/lang/Object
-  utf8 16 java/lang/System
-  utf8 3 out
-  utf8 21 Ljava/io/PrintStream;
-  utf8 19 java/io/PrintStream
-  utf8 7 println
-  utf8 21 (Ljava/lang/String;)V
+constant_pool : [
+  methodref 15 6;
+  fieldref 17 16;
+  string 18;
+  methodref 20 19;
+  class 21;
+  class 22;
+  utf8 6 <init>;
+  utf8 3 ()V;
+  utf8 4 Code;
+  utf8 15 LineNumberTable;
+  utf8 4 main;
+  utf8 22 ([Ljava/lang/String;)V;
+  utf8 10 SourceFile;
+  utf8 15 HelloWorld.java;
+  name_and_type 8 7;
+  class 23;
+  name_and_type 25 24;
+  utf8 12 Hello,world.;
+  class 26;
+  name_and_type 28 27;
+  utf8 10 HelloWorld;
+  utf8 16 java/lang/Object;
+  utf8 16 java/lang/System;
+  utf8 3 out;
+  utf8 21 Ljava/io/PrintStream;;
+  utf8 19 java/io/PrintStream;
+  utf8 7 println;
+  utf8 21 (Ljava/lang/String;)V;
 ]
 access_flags : 0x21
 this_class : 0x5
@@ -47,11 +47,68 @@ fields_count : 0
 fields : [
 ]
 methods_count : 2
-methods [
+methods : [
+  {
+    access_flags: 1;
+    name_index: <init>;
+    descriptor_index: ()V;
+    attributes: [
+      Code : {
+        max_stack: 1;
+        max_locals: 1;
+        code: [
+          42;
+          183;
+          0;
+          1;
+          177;
+        ];
+        exception_table: [
+        ];
+        attributes: [
+          LineNumberTable : [
+            { start_pc: 0; line_number: 1 };
+          ];
+        ]       };
+    ];
+  }
+;
+  {
+    access_flags: 9;
+    name_index: main;
+    descriptor_index: ([Ljava/lang/String;)V;
+    attributes: [
+      Code : {
+        max_stack: 2;
+        max_locals: 1;
+        code: [
+          178;
+          0;
+          2;
+          18;
+          3;
+          182;
+          0;
+          4;
+          177;
+        ];
+        exception_table: [
+        ];
+        attributes: [
+          LineNumberTable : [
+            { start_pc: 0; line_number: 3 };
+            { start_pc: 8; line_number: 4 };
+          ];
+        ]       };
+    ];
+  }
+;
 ]
 attributes_count : 1
-attributes [
+attributes : [
+  SourceFile : { 14 };
 ]
+
 
  ❯ xxd java_src/HelloWorld.class
 00000000: cafe babe 0000 0034 001d 0a00 0600 0f09  .......4........

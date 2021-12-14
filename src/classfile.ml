@@ -48,7 +48,7 @@ module Cp_info = struct
   let read_utf8 ic : t_utf8 = 
     let len = read_u2 ic in
     let n   = Uint16.to_int len in
-    { length = len; byte_array = Util.array_fill ~n ~init:Uint8.zero ~f:(fun _ -> read_u1 ic) }
+    { length = len; byte_array = Array.init n (fun _ -> read_u1 ic) }
 
   let read_method_handle ic : t_method_handle = { reference_kind = read_u1 ic ; reference_index = read_u2 ic }
   let read_method_type   ic : t_method_type   = { descriptor_index = read_u2 ic }
@@ -60,7 +60,7 @@ module Cp_info = struct
 
   exception Illegal_constant_pool_tag
   let read ic n : t array =
-    let f () =
+    let f _ =
       match read_byte ic |> Option.get |> int_of_char with
       |  7 -> Class               (read_u2 ic)
       |  9 -> Fieldref            (read_fieldref ic)
@@ -81,9 +81,14 @@ module Cp_info = struct
       | 20 -> Package             (read_u2 ic)
       | _  -> raise Illegal_constant_pool_tag
     in
-      Util.array_fill ~n ~init:Dummy ~f
+      Array.init n f
 
-  let to_string = function
+  (* todo : handle utf-8 *)
+  let utf8_to_string = function
+    | Utf8 v -> Array.fold_left (fun acc byte -> acc ^ (Uint8.to_int byte |> Char.chr |> Char.escaped)) "" v.byte_array
+    | _      -> raise @@ Invalid_argument "not utf8 in cp"
+
+  let to_debug_string = function
     | Dummy                 -> "dummy"
     | Class               v -> "class " ^ (Uint16.to_string v) 
     | Fieldref            v -> sprintf "fieldref %s %s" (Uint16.to_string v.class_index) (Uint16.to_string v.name_and_type_index)
@@ -95,8 +100,7 @@ module Cp_info = struct
     | Long                _ -> "long"
     | Double              _ -> "double"
     | Name_and_type       v -> sprintf "name_and_type %s %s" (Uint16.to_string v.name_index) (Uint16.to_string v.descriptor_index)
-    (* todo : handle utf-8 *)
-    | Utf8                v -> sprintf "utf8 %d %s" (Uint16.to_int v.length) (Array.fold_left (fun s b -> s ^ (Uint8.to_int b |> Char.chr |> Char.escaped)) "" v.byte_array)
+    | Utf8                v -> sprintf "utf8 %d %s" (Uint16.to_int v.length) (utf8_to_string @@ Utf8 v)
     | Method_handle       _ -> "method_handle"
     | Method_type         _ -> "method_type"
     | Dynamic             _ -> "dynamic"
@@ -106,28 +110,74 @@ module Cp_info = struct
 end
 
 module Attribute_info = struct 
+  type t_exception = { start_pc: uint16; end_pc: uint16; handler_pc: uint16; catch_type: uint16 }
+  type t_line_number = { start_pc: uint16; line_number: uint16 }
+  type t_code = { max_stack: uint16; max_locals: uint16; code: uint8 array; exception_table: t_exception array }
+
   type t =
-    (*
-    | Code
-    | Line_number_table
+    | Code of t_code * t array
+    | Line_number_table of t_line_number array
+    | Source_file of uint16
     | Not_implemented
-  *)
-    {
-      attribute_name_index: uint16;
-      attribute_length: uint32;
-      info: uint8 array;
-    }
 
-  let read ic =
-    let attribute_name_index = read_u2 ic in
-    let attribute_length = read_u4 ic in
-    let n    = Uint32.to_int attribute_length in
-    let info = Util.array_fill ~n ~init:Uint8.zero ~f:(fun _ -> read_u1 ic) in
-    { attribute_name_index; attribute_length; info }
+  let read_attribute_name ic cp =
+    let attribute_name_index     = read_u2 ic in
+    let _ (* attribute_length *) = read_u4 ic in
+    cp.(Uint16.to_int attribute_name_index - 1) |> Cp_info.utf8_to_string
 
-  let to_string _ = ""
+  let rec read ic cp =
+    match read_attribute_name ic cp with
+    | "Code" -> 
+        let max_stack   = read_u2 ic in
+        let max_locals  = read_u2 ic in
+        let code_length = read_u4 ic in
+        let n           = Uint32.to_int code_length in
+        let code        = Array.init n (fun _ -> read_u1 ic) in
+        let exception_table_length = read_u2 ic in
+        let n   = Uint16.to_int exception_table_length in
+        let f _ =
+          let start_pc   = read_u2 ic in
+          let end_pc     = read_u2 ic in
+          let handler_pc = read_u2 ic in
+          let catch_type = read_u2 ic in
+          { start_pc; end_pc; handler_pc; catch_type }
+        in
+        let exception_table  = Array.init n f in
+        let attributes_count = read_u2 ic in
+        let attributes_count = Uint16.to_int attributes_count in
+        let attributes = Array.init attributes_count (fun _ -> read ic cp) in
+        let code       = { max_stack; max_locals; code; exception_table } in
+        Code (code, attributes)
+    | "LineNumberTable" ->
+        let line_number_table_length = read_u2 ic in
+        let n     = Uint16.to_int line_number_table_length in
+        let f _   =
+          let start_pc    = read_u2 ic in
+          let line_number = read_u2 ic in
+          { start_pc; line_number }
+        in
+        Line_number_table (Array.init n f)
+    | "SourceFile" ->
+        Source_file (read_u2 ic)
+    | _ -> Not_implemented
 
-  let empty = { attribute_name_index = Uint16.zero; attribute_length = Uint32.zero; info = [| |] }
+  let rec to_debug_string ?(prefix="") = function
+    | Code (v, attributes) ->
+        let s = "Code : {\n" in
+        let s = s ^ prefix ^ "  max_stack: " ^ Uint16.to_string v.max_stack ^ ";\n"   in
+        let s = s ^ prefix ^ "  max_locals: " ^ Uint16.to_string v.max_locals ^ ";\n" in
+        let more_nest = prefix ^ "  " in
+        let s = s ^ prefix ^ "  code: " ^ Util.array_to_string ~prefix:more_nest v.code Uint8.to_string ^ ";\n" in
+        let e_to_s (e: t_exception) = "{ start_pc: " ^ Uint16.to_string e.start_pc ^ "; end_pc: " ^ Uint16.to_string e.end_pc ^ "; handler_pc: " ^ Uint16.to_string e.handler_pc ^ "; catch_type: " ^ Uint16.to_string e.catch_type ^ ";}"in
+        let s = s ^ prefix ^ "  exception_table: " ^ Util.array_to_string ~prefix:more_nest v.exception_table e_to_s ^ ";\n" in
+        let s = s ^ prefix ^ "  attributes: " ^ Util.array_to_string ~prefix:more_nest attributes (to_debug_string ~prefix:(more_nest ^ "  ")) in
+        s ^ prefix ^ " }"
+    | Line_number_table v ->
+        "LineNumberTable : " ^ Util.array_to_string ~prefix v (fun e -> "{ start_pc: " ^ Uint16.to_string e.start_pc ^ "; line_number: " ^ Uint16.to_string e.line_number ^ " }" )
+    | Source_file v ->
+        "SourceFile : { " ^ Uint16.to_string v ^ " }"
+    | Not_implemented ->
+        "NOT IMPLEMENTED"
 end
 
 module Field_info = struct
@@ -145,13 +195,29 @@ end
 module Method_info = struct
   type t = {
     access_flags: uint16;
-    name_index: uint16;
-    descriptor_index: uint16;
-    attributes_count: uint16;
+    name_index: string;
+    descriptor_index: string;
     attributes: Attribute_info.t array;
   }
 
-  let to_string _ = ""
+  let read ic cp =
+    let access_flags     = read_u2 ic in
+    let name_index       = read_u2 ic in
+    let name_index       = cp.(Uint16.to_int name_index - 1) |> Cp_info.utf8_to_string in
+    let descriptor_index = read_u2 ic in
+    let descriptor_index = cp.(Uint16.to_int descriptor_index - 1) |> Cp_info.utf8_to_string in
+    let attributes_count = read_u2 ic in
+    let attributes_count = Uint16.to_int attributes_count in
+    let attributes       = Array.init attributes_count (fun _ -> Attribute_info.read ic cp) in
+    { access_flags; name_index; descriptor_index; attributes }
+
+  let to_debug_string ?(prefix="") mi =
+    let s = "{\n" in
+    let s = s ^ prefix ^ "  access_flags: "     ^ Uint16.to_string mi.access_flags ^ ";\n" in
+    let s = s ^ prefix ^ "  name_index: "       ^ mi.name_index                    ^ ";\n" in
+    let s = s ^ prefix ^ "  descriptor_index: " ^ mi.descriptor_index              ^ ";\n" in
+    let s = s ^ prefix ^ "  attributes: " ^ Util.array_to_string ~prefix:(prefix ^ "  ") mi.attributes (Attribute_info.to_debug_string ~prefix:(prefix ^ "    ")) ^ ";\n" in
+    s ^ prefix ^ "}\n"
 end
 
 type t = {
@@ -183,14 +249,13 @@ let read ic : t =
   let this_class          = read_u2 ic in
   let super_class         = read_u2 ic in
   let interfaces_count    = read_u2 ic in
-  let interfaces          = [| |] in
+  let interfaces          = [| |] in (* stub *)
   let fields_count        = read_u2 ic in
-  let fields              = [| |] in
+  let fields              = [| |] in (* stub *)
   let methods_count       = read_u2 ic in
-  let methods             = [| |] in
+  let methods             = Array.init (Uint16.to_int methods_count) (fun _ -> Method_info.read ic constant_pool) in
   let attributes_count    = read_u2 ic in
-  let n                   = 0 (* stub *) in
-  let attributes          = Util.array_fill ~n ~init:Attribute_info.empty ~f:(fun _ -> Attribute_info.read ic) in
+  let attributes          = Array.init (Uint16.to_int attributes_count) (fun _ -> Attribute_info.read ic constant_pool) in
   {
     magic;
     minor_version; major_version;
@@ -209,26 +274,16 @@ let debug_print cf =
     printf "minor_version : %s\n" (Uint16.to_string_hex cf.minor_version);
     printf "major_version : %s\n" (Uint16.to_string_hex cf.major_version);
     printf "constant_pool_count : %s\n" (Uint16.to_string_hex cf.constant_pool_count);
-    print_endline "constant_pool [";
-    cf.constant_pool |> Array.iter (fun c -> "  " ^ (Cp_info.to_string c) |> print_endline);
-    print_endline "]";
+    printf "constant_pool : %s\n" (Util.array_to_string cf.constant_pool Cp_info.to_debug_string);
     printf "access_flags : %s\n" (Uint16.to_string_hex cf.access_flags);
     printf "this_class : %s\n" (Uint16.to_string_hex cf.this_class);
     printf "super_class : %s\n" (Uint16.to_string_hex cf.super_class);
     printf "interfaces_count : %d\n" (Uint16.to_int cf.interfaces_count);
-    print_endline "interfaces : [";
-    cf.interfaces |> Array.iter (fun i -> "  " ^ (Uint16.to_string i) |> print_endline);
-    print_endline "]";
+    printf "interfaces : %s\n" (Util.array_to_string cf.interfaces Uint16.to_string);
     printf "fields_count : %d\n" (Uint16.to_int cf.fields_count);
-    print_endline "fields : [";
-    cf.fields |> Array.iter (fun f -> "  " ^ (Field_info.to_string f) |> print_endline);
-    print_endline "]";
+    printf "fields : %s\n" (Util.array_to_string cf.fields Field_info.to_string);
     printf "methods_count : %d\n" (Uint16.to_int cf.methods_count);
-    print_endline "methods [";
-    cf.methods |> Array.iter (fun m -> "  " ^ (Method_info.to_string m) |> print_endline);
-    print_endline"]";
+    printf "methods : %s\n" (Util.array_to_string cf.methods (Method_info.to_debug_string ~prefix:"  "));
     printf "attributes_count : %d\n" (Uint16.to_int cf.attributes_count);
-    print_endline "attributes [";
-    cf.attributes |> Array.iter (fun a -> "  " ^ (Attribute_info.to_string a) |> print_endline);
-    print_endline"]";
+    printf "attributes : %s\n" (Util.array_to_string cf.attributes (Attribute_info.to_debug_string ~prefix:"  "));
   end
