@@ -69,10 +69,10 @@ methods : [
           LineNumberTable : [
             { start_pc: 0; line_number: 1 };
           ];
-        ]       };
+        ];
+      };
     ];
-  }
-;
+  };
   {
     access_flags: 9;
     name_index: main;
@@ -99,16 +99,15 @@ methods : [
             { start_pc: 0; line_number: 3 };
             { start_pc: 8; line_number: 4 };
           ];
-        ]       };
+        ];
+      };
     ];
-  }
-;
+  };
 ]
 attributes_count : 1
 attributes : [
   SourceFile : { 14 };
 ]
-
 
  ❯ xxd java_src/HelloWorld.class
 00000000: cafe babe 0000 0034 001d 0a00 0600 0f09  .......4........

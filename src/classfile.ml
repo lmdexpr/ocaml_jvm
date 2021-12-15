@@ -170,8 +170,8 @@ module Attribute_info = struct
         let s = s ^ prefix ^ "  code: " ^ Util.array_to_string ~prefix:more_nest v.code Uint8.to_string ^ ";\n" in
         let e_to_s (e: t_exception) = "{ start_pc: " ^ Uint16.to_string e.start_pc ^ "; end_pc: " ^ Uint16.to_string e.end_pc ^ "; handler_pc: " ^ Uint16.to_string e.handler_pc ^ "; catch_type: " ^ Uint16.to_string e.catch_type ^ ";}"in
         let s = s ^ prefix ^ "  exception_table: " ^ Util.array_to_string ~prefix:more_nest v.exception_table e_to_s ^ ";\n" in
-        let s = s ^ prefix ^ "  attributes: " ^ Util.array_to_string ~prefix:more_nest attributes (to_debug_string ~prefix:(more_nest ^ "  ")) in
-        s ^ prefix ^ " }"
+        let s = s ^ prefix ^ "  attributes: " ^ Util.array_to_string ~prefix:more_nest attributes (to_debug_string ~prefix:(more_nest ^ "  ")) ^ ";\n" in
+        s ^ prefix ^ "}"
     | Line_number_table v ->
         "LineNumberTable : " ^ Util.array_to_string ~prefix v (fun e -> "{ start_pc: " ^ Uint16.to_string e.start_pc ^ "; line_number: " ^ Uint16.to_string e.line_number ^ " }" )
     | Source_file v ->
@@ -217,7 +217,7 @@ module Method_info = struct
     let s = s ^ prefix ^ "  name_index: "       ^ mi.name_index                    ^ ";\n" in
     let s = s ^ prefix ^ "  descriptor_index: " ^ mi.descriptor_index              ^ ";\n" in
     let s = s ^ prefix ^ "  attributes: " ^ Util.array_to_string ~prefix:(prefix ^ "  ") mi.attributes (Attribute_info.to_debug_string ~prefix:(prefix ^ "    ")) ^ ";\n" in
-    s ^ prefix ^ "}\n"
+    s ^ prefix ^ "}"
 end
 
 type t = {
