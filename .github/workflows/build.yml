@@ -25,9 +25,9 @@ jobs:
       - name: setup opam
         run: |
           opam init --auto-setup --bare --enable-shell-hook
-          opam switch create 4.12.0+domains+effects --repositories=multicore=git+https://github.com/ocaml-multicore/multicore-opam.git,default
+          opam switch create --no-install 4.12.0+domains+effects --repositories=multicore=git+https://github.com/ocaml-multicore/multicore-opam.git,default
 
       - name: build
         run: |
-          opam install . --deps-only
+          opam install . --deps-only --yes
           opam exec -- dune build
