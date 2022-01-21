@@ -24,8 +24,8 @@ jobs:
           
       - name: setup opam
         run: |
-          opam init --auto-setup --bare --enable-shell-hook
-          opam switch create 4.12.0+domain+effects
+          opam init --auto-setup --bare --enable-shell-hookopam update
+          opam switch create 4.12.0+domains+effects --repositories=multicore=git+https://github.com/ocaml-multicore/multicore-opam.git,default
 
       - name: build
         run: |
