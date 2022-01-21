@@ -15,11 +15,10 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-
-      - name: setup ocaml
-        uses: ocaml/setup-ocaml@v2
-        with:
-          ocaml-compiler: ocaml-variants.4.12.0+domain+effects
+        
+      - run: add-apt-repository ppa:avsm/ppa
+      - run: apt update
+      - run: apt install opam
 
       - run: opam install . --deps-only
       - run: opam exec -- dune build
