@@ -21,6 +21,12 @@ jobs:
           sudo add-apt-repository ppa:avsm/ppa
           sudo apt update
           sudo apt install opam
+          
+      - name: setup opam
+        run: |
+          opam init --auto-setup --bare --enable-shell-hook
 
-      - run: opam install . --deps-only
-      - run: opam exec -- dune build
+      - name: build
+        run: |
+          opam install . --deps-only
+          opam exec -- dune build
