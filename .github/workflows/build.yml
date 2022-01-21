@@ -19,7 +19,7 @@ jobs:
       - name: setup ocaml
         uses: ocaml/setup-ocaml@v2
         with:
-          ocaml-compiler: 4.12.0+domain+effects
+          ocaml-compiler: ocaml-variants.4.12.0+domain+effects
 
       - run: opam install . --deps-only
       - run: opam exec -- dune build
