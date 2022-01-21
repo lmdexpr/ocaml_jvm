@@ -25,6 +25,7 @@ jobs:
       - name: setup opam
         run: |
           opam init --auto-setup --bare --enable-shell-hook
+          opam switch create . --no-install 4.12.0+domain+effects
 
       - name: build
         run: |
