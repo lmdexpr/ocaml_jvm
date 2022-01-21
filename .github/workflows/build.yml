@@ -1,0 +1,25 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: setup ocaml
+        uses: ocaml/setup-ocaml@v2
+        with:
+          ocaml-compiler: 4.12.0+domain+effects
+
+      - run: opam install . --deps-only
+      - run: opam exec -- dune build
