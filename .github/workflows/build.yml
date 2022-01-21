@@ -16,9 +16,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
         
-      - run: add-apt-repository ppa:avsm/ppa
-      - run: apt update
-      - run: apt install opam
+      - name: install opam
+        run: |
+          sudo add-apt-repository ppa:avsm/ppa
+          sudo apt update
+          sudo apt install opam
 
       - run: opam install . --deps-only
       - run: opam exec -- dune build
