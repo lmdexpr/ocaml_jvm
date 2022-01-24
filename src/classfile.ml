@@ -36,27 +36,50 @@ module Cp_info = struct
     | Module              of uint16
     | Package             of uint16
 
-  let read_fieldref ic  : t_fieldref  = { class_index = read_u2 ic; name_and_type_index = read_u2 ic }
-  let read_methodref ic : t_methodref = { class_index = read_u2 ic; name_and_type_index = read_u2 ic }
-  let read_interface_methodref ic : t_interface_methodref = { class_index = read_u2 ic; name_and_type_index = read_u2 ic }
+  let read_fieldref ic  : t_fieldref  =
+    let class_index = read_u2 ic in
+    let name_and_type_index = read_u2 ic in { class_index ; name_and_type_index }
 
-  let read_long   ic : t_long   = { high_bytes = read_u4 ic; low_bytes = read_u4 ic }
-  let read_double ic : t_double = { high_bytes = read_u4 ic; low_bytes = read_u4 ic }
+  let read_methodref ic : t_methodref =
+    let class_index = read_u2 ic in
+    let name_and_type_index = read_u2 ic in { class_index ; name_and_type_index }
 
-  let read_name_and_type ic : t_name_and_type = { name_index = read_u2 ic; descriptor_index = read_u2 ic }
+  let read_interface_methodref ic : t_interface_methodref =
+    let class_index = read_u2 ic in
+    let name_and_type_index = read_u2 ic in { class_index ; name_and_type_index }
+
+  let read_long   ic : t_long   =
+    let high_bytes = read_u4 ic in
+    let low_bytes  = read_u4 ic in { high_bytes; low_bytes }
+
+  let read_double ic : t_double =
+    let high_bytes = read_u4 ic in
+    let low_bytes  = read_u4 ic in { high_bytes; low_bytes }
+
+  let read_name_and_type ic : t_name_and_type = 
+    let name_index = read_u2 ic in
+    let descriptor_index = read_u2 ic in { name_index; descriptor_index }
 
   let read_utf8 ic : t_utf8 = 
     let len = read_u2 ic in
     let n   = Uint16.to_int len in
     { length = len; byte_array = Array.init n (fun _ -> read_u1 ic) }
 
-  let read_method_handle ic : t_method_handle = { reference_kind = read_u1 ic ; reference_index = read_u2 ic }
-  let read_method_type   ic : t_method_type   = { descriptor_index = read_u2 ic }
+  let read_method_handle ic : t_method_handle =
+    let reference_kind  = read_u1 ic in
+    let reference_index = read_u2 ic in { reference_kind; reference_index }
+
+  let read_method_type ic : t_method_type = { descriptor_index = read_u2 ic }
 
   let read_dynamic ic : t_dynamic =
-    { bootstrap_method_attr_index = read_u2 ic; name_and_type_index = read_u2 ic }
+    let bootstrap_method_attr_index = read_u2 ic in
+    let name_and_type_index         = read_u2 ic in
+    { bootstrap_method_attr_index ; name_and_type_index }
+
   let read_invoke_dynamic ic : t_invoke_dynamic =
-    { bootstrap_method_attr_index = read_u2 ic; name_and_type_index = read_u2 ic }
+    let bootstrap_method_attr_index = read_u2 ic in
+    let name_and_type_index         = read_u2 ic in
+    { bootstrap_method_attr_index ; name_and_type_index }
 
   exception Illegal_constant_pool_tag
   let read ic n : t array =
@@ -121,8 +144,8 @@ module Attribute_info = struct
     | Not_implemented
 
   let read_attribute_name ic cp =
-    let attribute_name_index     = read_u2 ic in
-    let _ (* attribute_length *) = read_u4 ic in
+    let attribute_name_index = read_u2 ic in
+    let _attribute_length    = read_u4 ic in
     cp.(Uint16.to_int attribute_name_index - 1) |> Cp_info.utf8_to_string
 
   let rec read ic cp =
