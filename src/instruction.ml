@@ -3,18 +3,20 @@ open Printf
 
 module Util = struct
   let get_constant constant_pool byte1 byte2 =
-    let byte1 = Uint16.of_uint8 byte1 
-    and byte2 = Uint16.of_uint8 byte2 in
-    constant_pool.( Uint16.((shift_left byte1 8) + byte2) |> Uint16.to_int )
+    let byte1 = Uint16.of_uint8 byte1 and byte2 = Uint16.of_uint8 byte2 in
+    constant_pool.(Uint16.(shift_left byte1 8 + byte2) |> Uint16.to_int)
 
-  let field_resolution constant_pool = function 
+  let field_resolution constant_pool = function
     | Cp_info.Fieldref { class_index; name_and_type_index } ->
-        let class_index         = Uint16.to_int class_index
+        let class_index = Uint16.to_int class_index
         and name_and_type_index = Uint16.to_int name_and_type_index in
         let callee_class =
           match constant_pool.(class_index) with
-          | Cp_info.Class v -> constant_pool.(Uint16.to_int v) |> Cp_info.utf8_to_string
-          | _ -> raise @@ Invalid_argument "illegal argument for resolution of field"
+          | Cp_info.Class v ->
+              constant_pool.(Uint16.to_int v) |> Cp_info.utf8_to_string
+          | _ ->
+              raise
+              @@ Invalid_argument "illegal argument for resolution of field"
         in
         let field, field_type =
           match constant_pool.(name_and_type_index) with
@@ -22,23 +24,19 @@ module Util = struct
               let name_index = Uint16.to_int name_index
               and descriptor_index = Uint16.to_int descriptor_index in
               (constant_pool.(name_index), constant_pool.(descriptor_index))
-          | _ -> raise @@ Invalid_argument "illegal argument for resolution of field"
+          | _ ->
+              raise
+              @@ Invalid_argument "illegal argument for resolution of field"
         in
-          (callee_class, field, field_type)
-        
+        (callee_class, field, field_type)
     | _ -> raise @@ Invalid_argument "illegal argument for resolution of field"
 end
 
 let aaload () = print_endline "aaload"
-
-let aastore () = print_endline "aastore" 
-
+let aastore () = print_endline "aastore"
 let aconst_null () = print_endline "aconst_null"
-
 let aload index = printf "aload %x\n" (Uint8.to_int index)
-
 let aload_ n = printf "aload_ %n\n" n
-
 let anewarray = ()
 let areturn = ()
 let arraylength = ()
@@ -100,9 +98,10 @@ let getfield = ()
 let getstatic rda byte1 byte2 =
   let cp = rda.run_time_cp in
   let symbol_name_index = Util.get_constant cp byte1 byte2 in
-  let callee_class, field, method_return = Util.field_resolution cp symbol_name_index
+  let callee_class, field, method_return =
+    Util.field_resolution cp symbol_name_index
   in
-    Stack.push (callee_class, field, method_return) rda.stacks 
+  Stack.push (callee_class, field, method_return) rda.stacks
 
 let goto = ()
 let goto_w = ()
@@ -143,13 +142,16 @@ let ineg = ()
 let instanceof = ()
 let invokedynamic = ()
 let invokeinterface = ()
-let invokespecial operand1 operand2 = 
-  Printf.printf "invokespecial %x %x\n" (Uint8.to_int operand1) (Uint8.to_int operand2)
+
+let invokespecial operand1 operand2 =
+  Printf.printf "invokespecial %x %x\n" (Uint8.to_int operand1)
+    (Uint8.to_int operand2)
 
 let invokestatic = ()
 
 let invokevirtual operand1 operand2 =
-  Printf.printf "invokevirtual %x %x\n" (Uint8.to_int operand1) (Uint8.to_int operand2)
+  Printf.printf "invokevirtual %x %x\n" (Uint8.to_int operand1)
+    (Uint8.to_int operand2)
 
 let ior = ()
 let irem = ()
@@ -172,9 +174,7 @@ let land_ = ()
 let lastore = ()
 let lcmp = ()
 let lconst_ l = ()
-
 let ldc operand = Printf.printf "ldc %x\n" (Uint8.to_int operand)
-
 let ldc_w = ()
 let ldc2_w = ()
 let ldiv = ()
@@ -204,9 +204,7 @@ let pop2 = ()
 let putfield = ()
 let putstatic = ()
 let ret = ()
-
 let return () = print_endline "return"
-
 let saload = ()
 let sastore = ()
 let sipush = ()
