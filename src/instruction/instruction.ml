@@ -1,6 +1,8 @@
 open Stdint
 open Printf
 
+open Classfile
+
 module Util = struct
   let get_constant constant_pool byte1 byte2 =
     let byte1 = Uint16.of_uint8 byte1 and byte2 = Uint16.of_uint8 byte2 in

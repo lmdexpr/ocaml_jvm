@@ -1,0 +1,3 @@
+(library
+  (name classfile)
+  (libraries utils stdint))

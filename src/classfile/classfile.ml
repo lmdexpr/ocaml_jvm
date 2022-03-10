@@ -1,6 +1,6 @@
 open Printf
 open Stdint
-open Reader
+open Utils.Reader
 
 module Cp_info = struct
   type t_fieldref = { class_index : uint16; name_and_type_index : uint16 }
@@ -241,7 +241,7 @@ module Attribute_info = struct
         let more_nest = prefix ^ "  " in
         let s =
           s ^ prefix ^ "  code: "
-          ^ Util.array_to_string ~prefix:more_nest v.code Uint8.to_string
+          ^ Utils.array_to_string ~prefix:more_nest v.code Uint8.to_string
           ^ ";\n"
         in
         let e_to_s (e : t_exception) =
@@ -255,19 +255,19 @@ module Attribute_info = struct
         in
         let s =
           s ^ prefix ^ "  exception_table: "
-          ^ Util.array_to_string ~prefix:more_nest v.exception_table e_to_s
+          ^ Utils.array_to_string ~prefix:more_nest v.exception_table e_to_s
           ^ ";\n"
         in
         let s =
           s ^ prefix ^ "  attributes: "
-          ^ Util.array_to_string ~prefix:more_nest attributes
+          ^ Utils.array_to_string ~prefix:more_nest attributes
               (to_debug_string ~prefix:(more_nest ^ "  "))
           ^ ";\n"
         in
         s ^ prefix ^ "}"
     | Line_number_table v ->
         "LineNumberTable : "
-        ^ Util.array_to_string ~prefix v (fun e ->
+        ^ Utils.array_to_string ~prefix v (fun e ->
               "{ start_pc: "
               ^ Uint16.to_string e.start_pc
               ^ "; line_number: "
@@ -323,7 +323,7 @@ module Method_info = struct
     let s = s ^ prefix ^ "  descriptor_index: " ^ mi.descriptor_index ^ ";\n" in
     let s =
       s ^ prefix ^ "  attributes: "
-      ^ Util.array_to_string ~prefix:(prefix ^ "  ") mi.attributes
+      ^ Utils.array_to_string ~prefix:(prefix ^ "  ") mi.attributes
           (Attribute_info.to_debug_string ~prefix:(prefix ^ "    "))
       ^ ";\n"
     in
@@ -402,19 +402,19 @@ let debug_print cf =
   printf "constant_pool_count : %s\n"
     (Uint16.to_string_hex cf.constant_pool_count);
   printf "constant_pool : %s\n"
-    (Util.array_to_string cf.constant_pool Cp_info.to_debug_string);
+    (Utils.array_to_string cf.constant_pool Cp_info.to_debug_string);
   printf "access_flags : %s\n" (Uint16.to_string_hex cf.access_flags);
   printf "this_class : %s\n" (Uint16.to_string_hex cf.this_class);
   printf "super_class : %s\n" (Uint16.to_string_hex cf.super_class);
   printf "interfaces_count : %d\n" (Uint16.to_int cf.interfaces_count);
   printf "interfaces : %s\n"
-    (Util.array_to_string cf.interfaces Uint16.to_string);
+    (Utils.array_to_string cf.interfaces Uint16.to_string);
   printf "fields_count : %d\n" (Uint16.to_int cf.fields_count);
-  printf "fields : %s\n" (Util.array_to_string cf.fields Field_info.to_string);
+  printf "fields : %s\n" (Utils.array_to_string cf.fields Field_info.to_string);
   printf "methods_count : %d\n" (Uint16.to_int cf.methods_count);
   printf "methods : %s\n"
-    (Util.array_to_string cf.methods (Method_info.to_debug_string ~prefix:"  "));
+    (Utils.array_to_string cf.methods (Method_info.to_debug_string ~prefix:"  "));
   printf "attributes_count : %d\n" (Uint16.to_int cf.attributes_count);
   printf "attributes : %s\n"
-    (Util.array_to_string cf.attributes
+    (Utils.array_to_string cf.attributes
        (Attribute_info.to_debug_string ~prefix:"  "))
