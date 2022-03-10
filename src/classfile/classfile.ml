@@ -1,7 +1,6 @@
 open Printf
 open Stdint
 open Utils.Reader
-
 module Cp_info = Cp_info
 module Attribute_info = Attribute_info
 module Field_info = Field_info
@@ -90,7 +89,8 @@ let debug_print cf =
   printf "fields : %s\n" (Utils.array_to_string cf.fields Field_info.to_string);
   printf "methods_count : %d\n" (Uint16.to_int cf.methods_count);
   printf "methods : %s\n"
-    (Utils.array_to_string cf.methods (Method_info.to_debug_string ~prefix:"  "));
+    (Utils.array_to_string cf.methods
+       (Method_info.to_debug_string ~prefix:"  "));
   printf "attributes_count : %d\n" (Uint16.to_int cf.attributes_count);
   printf "attributes : %s\n"
     (Utils.array_to_string cf.attributes

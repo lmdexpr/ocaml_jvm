@@ -129,8 +129,7 @@ let read ic n : t array =
 let utf8_to_string = function
   | Utf8 v ->
       Array.fold_left
-        (fun acc byte ->
-          acc ^ (Uint8.to_int byte |> Char.chr |> Char.escaped))
+        (fun acc byte -> acc ^ (Uint8.to_int byte |> Char.chr |> Char.escaped))
         "" v.byte_array
   | _ -> raise @@ Invalid_argument "not utf8 in cp"
 
