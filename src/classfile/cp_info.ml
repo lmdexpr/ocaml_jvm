@@ -1,0 +1,165 @@
+open Printf
+open Stdint
+open Utils.Reader
+
+type t_fieldref = { class_index : uint16; name_and_type_index : uint16 }
+type t_methodref = { class_index : uint16; name_and_type_index : uint16 }
+
+type t_interface_methodref = {
+  class_index : uint16;
+  name_and_type_index : uint16;
+}
+
+type t_long = { high_bytes : uint32; low_bytes : uint32 }
+type t_double = { high_bytes : uint32; low_bytes : uint32 }
+type t_name_and_type = { name_index : uint16; descriptor_index : uint16 }
+type t_utf8 = { length : uint16; byte_array : uint8 array }
+type t_method_handle = { reference_kind : uint8; reference_index : uint16 }
+type t_method_type = { descriptor_index : uint16 }
+
+type t_dynamic = {
+  bootstrap_method_attr_index : uint16;
+  name_and_type_index : uint16;
+}
+
+type t_invoke_dynamic = {
+  bootstrap_method_attr_index : uint16;
+  name_and_type_index : uint16;
+}
+
+type t =
+  | Dummy
+  | Class of uint16
+  | Fieldref of t_fieldref
+  | Methodref of t_methodref
+  | Interface_mehotdref of t_interface_methodref
+  | String of uint16
+  | Integer of uint32
+  | Float of uint32
+  | Long of t_long
+  | Double of t_double
+  | Name_and_type of t_name_and_type
+  | Utf8 of t_utf8
+  | Method_handle of t_method_handle
+  | Method_type of t_method_type
+  | Dynamic of t_dynamic
+  | Invoke_dynamic of t_invoke_dynamic
+  | Module of uint16
+  | Package of uint16
+
+let read_fieldref ic : t_fieldref =
+  let class_index = read_u2 ic in
+  let name_and_type_index = read_u2 ic in
+  { class_index; name_and_type_index }
+
+let read_methodref ic : t_methodref =
+  let class_index = read_u2 ic in
+  let name_and_type_index = read_u2 ic in
+  { class_index; name_and_type_index }
+
+let read_interface_methodref ic : t_interface_methodref =
+  let class_index = read_u2 ic in
+  let name_and_type_index = read_u2 ic in
+  { class_index; name_and_type_index }
+
+let read_long ic : t_long =
+  let high_bytes = read_u4 ic in
+  let low_bytes = read_u4 ic in
+  { high_bytes; low_bytes }
+
+let read_double ic : t_double =
+  let high_bytes = read_u4 ic in
+  let low_bytes = read_u4 ic in
+  { high_bytes; low_bytes }
+
+let read_name_and_type ic : t_name_and_type =
+  let name_index = read_u2 ic in
+  let descriptor_index = read_u2 ic in
+  { name_index; descriptor_index }
+
+let read_utf8 ic : t_utf8 =
+  let len = read_u2 ic in
+  let n = Uint16.to_int len in
+  { length = len; byte_array = Array.init n (fun _ -> read_u1 ic) }
+
+let read_method_handle ic : t_method_handle =
+  let reference_kind = read_u1 ic in
+  let reference_index = read_u2 ic in
+  { reference_kind; reference_index }
+
+let read_method_type ic : t_method_type = { descriptor_index = read_u2 ic }
+
+let read_dynamic ic : t_dynamic =
+  let bootstrap_method_attr_index = read_u2 ic in
+  let name_and_type_index = read_u2 ic in
+  { bootstrap_method_attr_index; name_and_type_index }
+
+let read_invoke_dynamic ic : t_invoke_dynamic =
+  let bootstrap_method_attr_index = read_u2 ic in
+  let name_and_type_index = read_u2 ic in
+  { bootstrap_method_attr_index; name_and_type_index }
+
+exception Illegal_constant_pool_tag
+
+let read ic n : t array =
+  let f _ =
+    match read_byte ic |> Option.get |> int_of_char with
+    | 7 -> Class (read_u2 ic)
+    | 9 -> Fieldref (read_fieldref ic)
+    | 10 -> Methodref (read_methodref ic)
+    | 11 -> Interface_mehotdref (read_interface_methodref ic)
+    | 8 -> String (read_u2 ic)
+    | 3 -> Integer (read_u4 ic)
+    | 4 -> Float (read_u4 ic)
+    | 5 -> Long (read_long ic)
+    | 6 -> Double (read_double ic)
+    | 12 -> Name_and_type (read_name_and_type ic)
+    | 1 -> Utf8 (read_utf8 ic)
+    | 15 -> Method_handle (read_method_handle ic)
+    | 16 -> Method_type (read_method_type ic)
+    | 17 -> Dynamic (read_dynamic ic)
+    | 18 -> Invoke_dynamic (read_invoke_dynamic ic)
+    | 19 -> Module (read_u2 ic)
+    | 20 -> Package (read_u2 ic)
+    | _ -> raise Illegal_constant_pool_tag
+  in
+  Array.init n f
+
+(* todo : handle utf-8 *)
+let utf8_to_string = function
+  | Utf8 v ->
+      Array.fold_left
+        (fun acc byte ->
+          acc ^ (Uint8.to_int byte |> Char.chr |> Char.escaped))
+        "" v.byte_array
+  | _ -> raise @@ Invalid_argument "not utf8 in cp"
+
+let to_debug_string = function
+  | Dummy -> "dummy"
+  | Class v -> "class " ^ Uint16.to_string v
+  | Fieldref v ->
+      sprintf "fieldref %s %s"
+        (Uint16.to_string v.class_index)
+        (Uint16.to_string v.name_and_type_index)
+  | Methodref v ->
+      sprintf "methodref %s %s"
+        (Uint16.to_string v.class_index)
+        (Uint16.to_string v.name_and_type_index)
+  | Interface_mehotdref _ -> "interface_methodref"
+  | String v -> "string " ^ Uint16.to_string v
+  | Integer _ -> "integer"
+  | Float _ -> "float"
+  | Long _ -> "long"
+  | Double _ -> "double"
+  | Name_and_type v ->
+      sprintf "name_and_type %s %s"
+        (Uint16.to_string v.name_index)
+        (Uint16.to_string v.descriptor_index)
+  | Utf8 v ->
+      sprintf "utf8 %d %s" (Uint16.to_int v.length) (utf8_to_string @@ Utf8 v)
+  | Method_handle _ -> "method_handle"
+  | Method_type _ -> "method_type"
+  | Dynamic _ -> "dynamic"
+  | Invoke_dynamic _ -> "invoke_dynamic"
+  | Module _ -> "module"
+  | Package _ -> "package"
