@@ -15,25 +15,25 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-        
+
       - name: install opam
         run: |
           sudo add-apt-repository ppa:avsm/ppa
           sudo apt update
           sudo apt install opam
           opam init --auto-setup --bare --enable-shell-hook
-          
+
       - name: restore cache
         uses: actions/cache@v2
         with:
           path: ~/_opam
           key: opam-${{ hashFiles('ocaml_jvm.opam') }}
           restore-keys: opam-
-          
+
       - name: opam switch create (use cache)
         continue-on-error: true
         run: |
-          opam switch create . --no-install 4.12.0+domains+effects --repositories=multicore=git+https://github.com/ocaml-multicore/multicore-opam.git,default
+          opam switch create . --no-install 4.12.0+domains --repositories=multicore=git+https://github.com/ocaml-multicore/multicore-opam.git,default
 
       - name: opam install (use cache)
         run: |
