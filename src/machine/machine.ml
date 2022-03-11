@@ -4,18 +4,11 @@ end
 
 module Runtime_data_area = struct
   type t = {
-    (* todo
-       pc_register: Frame.t;
-    *)
+    (* todo pc_register: Frame.t; *)
     stacks : frame Stack.t;
-    (* todo
-       heap: ???;
-       method_area: ???;
-    *)
+    (* todo heap: ???; method_area: ???; *)
     run_time_cp : Classfile.Cp_info.t array;
-        (* todo
-           native_method_stacks: ??? Stack.t;
-        *)
+        (* todo native_method_stacks: ??? Stack.t; *)
   }
 
   let create (class_file : Classfile.t) : Runtime_data_area.t =
@@ -237,5 +230,5 @@ let run (entry_class : Classfile.t) =
   match entry_class.methods.attributes.(1) with
   (* todo load constructor *)
   | Code ({ _max_stack; _max_locals; code; _exception_table }, _attributes) ->
-      step (Array.to_list code |> List.map Uint8.to_int)
+    step (Array.to_list code |> List.map Uint8.to_int)
   | _ -> print_endline "illegal entry_point"

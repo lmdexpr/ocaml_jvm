@@ -128,22 +128,22 @@ let read ic n : t array =
 (* todo : handle utf-8 *)
 let utf8_to_string = function
   | Utf8 v ->
-      Array.fold_left
-        (fun acc byte -> acc ^ (Uint8.to_int byte |> Char.chr |> Char.escaped))
-        "" v.byte_array
+    Array.fold_left
+      (fun acc byte -> acc ^ (Uint8.to_int byte |> Char.chr |> Char.escaped))
+      "" v.byte_array
   | _ -> raise @@ Invalid_argument "not utf8 in cp"
 
 let to_debug_string = function
   | Dummy -> "dummy"
   | Class v -> "class " ^ Uint16.to_string v
   | Fieldref v ->
-      sprintf "fieldref %s %s"
-        (Uint16.to_string v.class_index)
-        (Uint16.to_string v.name_and_type_index)
+    sprintf "fieldref %s %s"
+      (Uint16.to_string v.class_index)
+      (Uint16.to_string v.name_and_type_index)
   | Methodref v ->
-      sprintf "methodref %s %s"
-        (Uint16.to_string v.class_index)
-        (Uint16.to_string v.name_and_type_index)
+    sprintf "methodref %s %s"
+      (Uint16.to_string v.class_index)
+      (Uint16.to_string v.name_and_type_index)
   | Interface_mehotdref _ -> "interface_methodref"
   | String v -> "string " ^ Uint16.to_string v
   | Integer _ -> "integer"
@@ -151,11 +151,11 @@ let to_debug_string = function
   | Long _ -> "long"
   | Double _ -> "double"
   | Name_and_type v ->
-      sprintf "name_and_type %s %s"
-        (Uint16.to_string v.name_index)
-        (Uint16.to_string v.descriptor_index)
+    sprintf "name_and_type %s %s"
+      (Uint16.to_string v.name_index)
+      (Uint16.to_string v.descriptor_index)
   | Utf8 v ->
-      sprintf "utf8 %d %s" (Uint16.to_int v.length) (utf8_to_string @@ Utf8 v)
+    sprintf "utf8 %d %s" (Uint16.to_int v.length) (utf8_to_string @@ Utf8 v)
   | Method_handle _ -> "method_handle"
   | Method_type _ -> "method_type"
   | Dynamic _ -> "dynamic"

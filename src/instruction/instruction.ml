@@ -9,27 +9,25 @@ module Util = struct
 
   let field_resolution constant_pool = function
     | Cp_info.Fieldref { class_index; name_and_type_index } ->
-        let class_index = Uint16.to_int class_index
-        and name_and_type_index = Uint16.to_int name_and_type_index in
-        let callee_class =
-          match constant_pool.(class_index) with
-          | Cp_info.Class v ->
-              constant_pool.(Uint16.to_int v) |> Cp_info.utf8_to_string
-          | _ ->
-              raise
-              @@ Invalid_argument "illegal argument for resolution of field"
-        in
-        let field, field_type =
-          match constant_pool.(name_and_type_index) with
-          | Cp_info.Name_and_type { name_index; descriptor_index } ->
-              let name_index = Uint16.to_int name_index
-              and descriptor_index = Uint16.to_int descriptor_index in
-              (constant_pool.(name_index), constant_pool.(descriptor_index))
-          | _ ->
-              raise
-              @@ Invalid_argument "illegal argument for resolution of field"
-        in
-        (callee_class, field, field_type)
+      let class_index = Uint16.to_int class_index
+      and name_and_type_index = Uint16.to_int name_and_type_index in
+      let callee_class =
+        match constant_pool.(class_index) with
+        | Cp_info.Class v ->
+          constant_pool.(Uint16.to_int v) |> Cp_info.utf8_to_string
+        | _ ->
+          raise @@ Invalid_argument "illegal argument for resolution of field"
+      in
+      let field, field_type =
+        match constant_pool.(name_and_type_index) with
+        | Cp_info.Name_and_type { name_index; descriptor_index } ->
+          let name_index = Uint16.to_int name_index
+          and descriptor_index = Uint16.to_int descriptor_index in
+          (constant_pool.(name_index), constant_pool.(descriptor_index))
+        | _ ->
+          raise @@ Invalid_argument "illegal argument for resolution of field"
+      in
+      (callee_class, field, field_type)
     | _ -> raise @@ Invalid_argument "illegal argument for resolution of field"
 end
 
