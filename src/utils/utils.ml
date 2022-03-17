@@ -1,6 +1,15 @@
+module Reader = Reader
+
 let array_to_string ?(prefix = "") arr f =
   "[\n"
   ^ Array.fold_left (fun acc e -> acc ^ prefix ^ "  " ^ f e ^ ";\n") "" arr
   ^ prefix ^ "]"
 
-module Reader = Reader
+let unwind ~(protect : 'a -> unit) f x =
+  try
+    let y = f x in
+    protect x;
+    y
+  with e ->
+    protect x;
+    raise e
