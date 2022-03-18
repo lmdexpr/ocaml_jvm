@@ -4,7 +4,7 @@ open Classfile
 module Frame : sig
   type t = Callable of Cp_info.t * Cp_info.t * Cp_info.t | String of string
 
-  val to_string : t -> string
+  val to_java_primitive : t -> Java_libs.primitive
 end
 
 module Runtime_data_area : sig
@@ -28,4 +28,4 @@ val field_resolution : t -> Cp_info.t -> Frame.t
 
 (* operator of stack *)
 val stack_push : t -> Frame.t -> unit
-val stack_pop : t -> int -> Frame.t array
+val stack_pop : t -> int -> Frame.t list

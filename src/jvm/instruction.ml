@@ -129,13 +129,7 @@ let invokevirtual machine op1 op2 =
     in
     let arguments = Str.(split (regexp ";") arguments) in
     let arguments = List.length arguments - 1 |> Machine.stack_pop machine in
-    if method_name <> "println" then
-      invalid_arg @@ "not implemented pattern of invokevirtual : method is "
-      ^ method_name
-    else
-      let print_stream = new Java_libs.Io.print_stream in
-      (* 今のところ引数が 1 つしかないことが分かっている *)
-      print_stream#println @@ Frame.to_string arguments.(0)
+    Java_libs.call method_name @@ List.map Frame.to_java_primitive arguments
   | _ -> invalid_arg "not implemented pattern of invokevirtual"
 
 let ior = ()

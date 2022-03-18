@@ -4,9 +4,9 @@ open Classfile
 module Frame = struct
   type t = Callable of Cp_info.t * Cp_info.t * Cp_info.t | String of string
 
-  let to_string = function
-    | String s -> s
-    | _ -> invalid_arg "not implemented : Frame.to_string"
+  let to_java_primitive = function
+    | String s -> Java_libs.String s
+    | _ -> Java_libs.Not_implemented
 end
 
 module Runtime_data_area = struct
@@ -67,4 +67,4 @@ let field_resolution machine = function
     invalid_arg @@ "for resolution of field :" ^ Cp_info.to_debug_string info
 
 let stack_push machine frame = Stack.push frame machine.rda.stacks
-let stack_pop machine n = Array.init n (fun _ -> Stack.pop machine.rda.stacks)
+let stack_pop machine n = List.init n (fun _ -> Stack.pop machine.rda.stacks)
