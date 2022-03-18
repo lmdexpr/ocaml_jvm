@@ -1,5 +1,5 @@
 open Stdint
-open Utils.Import
+open Utils
 
 (* type *)
 type t

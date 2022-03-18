@@ -57,7 +57,7 @@ let field_resolution machine c =
   in
   let field = get_constant_16 name_and_type.name_index
   and field_type = get_constant_16 name_and_type.descriptor_index in
-  return @@ Frame.Callable (callee_class, field, field_type)
+  Result.ok @@ Frame.Callable (callee_class, field, field_type)
 
 let stack_push machine frame = Stack.push frame machine.rda.stacks
 let stack_pop machine n = List.init n (fun _ -> Stack.pop machine.rda.stacks)
