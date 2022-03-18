@@ -39,5 +39,8 @@ jobs:
         run: |
           opam install . --deps-only --yes
 
-      - name: exec
+      - name: exec HelloWorld
         run: opam exec -- dune exec ocaml_jvm java_src/HelloWorld.class
+
+      - name: exec FizzBuzz
+        run: opam exec -- dune exec ocaml_jvm java_src/FizzBuzz.class
