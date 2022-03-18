@@ -3,9 +3,7 @@ open Classfile
 open Machine
 open Utils.Try.Ops
 
-let not_implemented ?(name = "") =
-  Result.error @@ Failure ("not_implemented " ^ name)
-
+let not_implemented ~name = Result.error @@ Failure ("not_implemented " ^ name)
 let aaload = not_implemented ~name:"aaload"
 let aastore = not_implemented ~name:"aastore"
 let aconst_null = not_implemented ~name:"aconst_null"
