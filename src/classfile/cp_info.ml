@@ -55,7 +55,6 @@ type t_invoke_dynamic =
   }
 
 type t =
-  | Dummy
   | Class of uint16
   | Fieldref of t_fieldref
   | Methodref of t_methodref
@@ -74,6 +73,111 @@ type t =
   | Module of uint16
   | Package of uint16
 
+let unwrap_class = function
+  | Class v -> Option.some v
+  | _ -> None
+
+let unwrap_fieldref = function
+  | Fieldref v -> Option.some v
+  | _ -> None
+
+let unwrap_methodref = function
+  | Methodref v -> Option.some v
+  | _ -> None
+
+let unwrap_interface_methodref = function
+  | Interface_mehotdref v -> Option.some v
+  | _ -> None
+
+let unwrap_string = function
+  | String v -> Option.some v
+  | _ -> None
+
+let unwrap_integer = function
+  | Integer v -> Option.some v
+  | _ -> None
+
+let unwrap_float = function
+  | Float v -> Option.some v
+  | _ -> None
+
+let unwrap_long = function
+  | Long v -> Option.some v
+  | _ -> None
+
+let unwrap_double = function
+  | Double v -> Option.some v
+  | _ -> None
+
+let unwrap_name_and_type = function
+  | Name_and_type v -> Option.some v
+  | _ -> None
+
+let unwrap_utf8 = function
+  | Utf8 v -> Option.some v
+  | _ -> None
+
+let unwrap_method_handle = function
+  | Method_handle v -> Option.some v
+  | _ -> None
+
+let unwrap_method_type = function
+  | Method_type v -> Option.some v
+  | _ -> None
+
+let unwrap_dynamic = function
+  | Dynamic v -> Option.some v
+  | _ -> None
+
+let unwrap_invoke_dynamic = function
+  | Invoke_dynamic v -> Option.some v
+  | _ -> None
+
+let unwrap_module = function
+  | Module v -> Option.some v
+  | _ -> None
+
+let unwrap_package = function
+  | Package v -> Option.some v
+  | _ -> None
+
+(* todo : handle utf-8 *)
+let utf8_to_string v =
+  Array.fold_left
+    (fun acc byte -> acc ^ (Uint8.to_int byte |> Char.chr |> Char.escaped))
+    "" v.byte_array
+
+let unsafe_utf8_to_string v = unwrap_utf8 v |> Option.get |> utf8_to_string
+
+let to_string = function
+  | Class v -> "class " ^ Uint16.to_string v
+  | Fieldref v ->
+    sprintf "fieldref %s %s"
+      (Uint16.to_string v.class_index)
+      (Uint16.to_string v.name_and_type_index)
+  | Methodref v ->
+    sprintf "methodref %s %s"
+      (Uint16.to_string v.class_index)
+      (Uint16.to_string v.name_and_type_index)
+  | Interface_mehotdref _ -> "interface_methodref"
+  | String v -> "string " ^ Uint16.to_string v
+  | Integer _ -> "integer"
+  | Float _ -> "float"
+  | Long _ -> "long"
+  | Double _ -> "double"
+  | Name_and_type v ->
+    sprintf "name_and_type %s %s"
+      (Uint16.to_string v.name_index)
+      (Uint16.to_string v.descriptor_index)
+  | Utf8 v -> sprintf "utf8 %d %s" (Uint16.to_int v.length) (utf8_to_string v)
+  | Method_handle _ -> "method_handle"
+  | Method_type _ -> "method_type"
+  | Dynamic _ -> "dynamic"
+  | Invoke_dynamic _ -> "invoke_dynamic"
+  | Module _ -> "module"
+  | Package _ -> "package"
+
+(* reader *)
 let read_fieldref ic : t_fieldref =
   let class_index = read_u2 ic in
   let name_and_type_index = read_u2 ic in
@@ -151,41 +255,3 @@ let read ic n : t array =
     | _ -> raise Illegal_constant_pool_tag
   in
   Array.init n f
-
-(* todo : handle utf-8 *)
-let utf8_to_string = function
-  | Utf8 v ->
-    Array.fold_left
-      (fun acc byte -> acc ^ (Uint8.to_int byte |> Char.chr |> Char.escaped))
-      "" v.byte_array
-  | _ -> raise @@ Invalid_argument "not utf8 in cp"
-
-let to_debug_string = function
-  | Dummy -> "dummy"
-  | Class v -> "class " ^ Uint16.to_string v
-  | Fieldref v ->
-    sprintf "fieldref %s %s"
-      (Uint16.to_string v.class_index)
-      (Uint16.to_string v.name_and_type_index)
-  | Methodref v ->
-    sprintf "methodref %s %s"
-      (Uint16.to_string v.class_index)
-      (Uint16.to_string v.name_and_type_index)
-  | Interface_mehotdref _ -> "interface_methodref"
-  | String v -> "string " ^ Uint16.to_string v
-  | Integer _ -> "integer"
-  | Float _ -> "float"
-  | Long _ -> "long"
-  | Double _ -> "double"
-  | Name_and_type v ->
-    sprintf "name_and_type %s %s"
-      (Uint16.to_string v.name_index)
-      (Uint16.to_string v.descriptor_index)
-  | Utf8 v ->
-    sprintf "utf8 %d %s" (Uint16.to_int v.length) (utf8_to_string @@ Utf8 v)
-  | Method_handle _ -> "method_handle"
-  | Method_type _ -> "method_type"
-  | Dynamic _ -> "dynamic"
-  | Invoke_dynamic _ -> "invoke_dynamic"
-  | Module _ -> "module"
-  | Package _ -> "package"

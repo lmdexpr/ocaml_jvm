@@ -44,31 +44,19 @@ let get_constant_8 machine byte1 byte2 =
   get_constant_16 machine Uint16.(shift_left byte1 8 + byte2)
 
 (* resolution *)
-let field_resolution machine = function
-  | Cp_info.Fieldref { class_index; name_and_type_index } ->
-    let constant_pool = machine.rda.cp in
-    let class_index = Uint16.to_int class_index - 1
-    and name_and_type_index = Uint16.to_int name_and_type_index - 1 in
-    let callee_class =
-      match constant_pool.(class_index) with
-      | Cp_info.Class v -> constant_pool.(Uint16.to_int v - 1)
-      | info ->
-        invalid_arg @@ "for resolution of field :"
-        ^ Cp_info.to_debug_string info
-    in
-    let field, field_type =
-      match constant_pool.(name_and_type_index) with
-      | Cp_info.Name_and_type { name_index; descriptor_index } ->
-        let name_index = Uint16.to_int name_index - 1
-        and descriptor_index = Uint16.to_int descriptor_index - 1 in
-        (constant_pool.(name_index), constant_pool.(descriptor_index))
-      | info ->
-        invalid_arg @@ "for resolution of field :"
-        ^ Cp_info.to_debug_string info
-    in
-    Frame.Callable (callee_class, field, field_type)
-  | info ->
-    invalid_arg @@ "for resolution of field :" ^ Cp_info.to_debug_string info
+let field_resolution machine c =
+  let get_constant_16 = get_constant_16 machine in
+  let fieldref = Cp_info.unwrap_fieldref c |> Option.get in
+  let callee_class =
+    get_constant_16 fieldref.class_index
+    |> Cp_info.unwrap_class |> Option.get |> get_constant_16
+  and name_and_type =
+    get_constant_16 fieldref.name_and_type_index
+    |> Cp_info.unwrap_name_and_type |> Option.get
+  in
+  let field = get_constant_16 name_and_type.name_index
+  and field_type = get_constant_16 name_and_type.descriptor_index in
+  Frame.Callable (callee_class, field, field_type)
 
 let stack_push machine frame = Stack.push frame machine.rda.stacks
 let stack_pop machine n = List.init n (fun _ -> Stack.pop machine.rda.stacks)

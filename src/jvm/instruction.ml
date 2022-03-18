@@ -1,5 +1,6 @@
 open Stdint
 open Printf
+open Classfile
 open Machine
 
 let aaload () = print_endline "aaload"
@@ -116,21 +117,20 @@ let invokestatic = ()
 
 let invokevirtual machine op1 op2 =
   let get_constant_16 = get_constant_16 machine in
-  match get_constant_8 machine op1 op2 with
-  | Classfile.Cp_info.Methodref { class_index; name_and_type_index } ->
-    let _ = class_index in
-    let method_name, arguments =
-      match get_constant_16 name_and_type_index with
-      | Classfile.Cp_info.Name_and_type { name_index; descriptor_index } ->
-        Classfile.Cp_info.
-          ( get_constant_16 name_index |> utf8_to_string
-          , get_constant_16 descriptor_index |> utf8_to_string )
-      | _ -> invalid_arg "not implemented pattern of invokevirtual"
-    in
-    let arguments = Str.(split (regexp ";") arguments) in
-    let arguments = List.length arguments - 1 |> Machine.stack_pop machine in
-    Java_libs.call method_name @@ List.map Frame.to_java_primitive arguments
-  | _ -> invalid_arg "not implemented pattern of invokevirtual"
+  let name_and_type =
+    (get_constant_8 machine op1 op2 |> Cp_info.unwrap_methodref |> Option.get)
+      .name_and_type_index |> get_constant_16 |> Cp_info.unwrap_name_and_type
+    |> Option.get
+  in
+  let method_name =
+    get_constant_16 name_and_type.name_index |> Cp_info.unsafe_utf8_to_string
+  and arguments =
+    get_constant_16 name_and_type.descriptor_index
+    |> Cp_info.unsafe_utf8_to_string
+  in
+  let arguments = Str.(split (regexp ";") arguments) in
+  let arguments = List.length arguments - 1 |> stack_pop machine in
+  Java_libs.call method_name @@ List.map Frame.to_java_primitive arguments
 
 let ior = ()
 let irem = ()
@@ -155,11 +155,10 @@ let lcmp = ()
 let lconst_ = ()
 
 let ldc machine operand =
-  match get_constant machine operand with
-  | Classfile.Cp_info.String v ->
-    Frame.String (get_constant_16 machine v |> Classfile.Cp_info.utf8_to_string)
-    |> Machine.stack_push machine
-  | _ -> invalid_arg "not implemented"
+  get_constant machine operand
+  |> Cp_info.unwrap_string |> Option.get |> get_constant_16 machine
+  |> Cp_info.unsafe_utf8_to_string
+  |> fun s -> Frame.String s |> stack_push machine
 
 let ldc_w = ()
 let ldc2_w = ()

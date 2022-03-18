@@ -12,11 +12,11 @@ let read ic cp =
   let access_flags = read_u2 ic in
   let name_index = read_u2 ic in
   let name_index =
-    cp.(Uint16.to_int name_index - 1) |> Cp_info.utf8_to_string
+    cp.(Uint16.to_int name_index - 1) |> Cp_info.unsafe_utf8_to_string
   in
   let descriptor_index = read_u2 ic in
   let descriptor_index =
-    cp.(Uint16.to_int descriptor_index - 1) |> Cp_info.utf8_to_string
+    cp.(Uint16.to_int descriptor_index - 1) |> Cp_info.unsafe_utf8_to_string
   in
   let attributes_count = read_u2 ic in
   let attributes_count = Uint16.to_int attributes_count in

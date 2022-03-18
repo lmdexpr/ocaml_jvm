@@ -29,7 +29,7 @@ type t =
 let read_attribute_name ic cp =
   let attribute_name_index = read_u2 ic in
   let _attribute_length = read_u4 ic in
-  cp.(Uint16.to_int attribute_name_index - 1) |> Cp_info.utf8_to_string
+  cp.(Uint16.to_int attribute_name_index - 1) |> Cp_info.unsafe_utf8_to_string
 
 let rec read ic cp =
   match read_attribute_name ic cp with

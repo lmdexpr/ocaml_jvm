@@ -77,7 +77,7 @@ let debug_print cf =
   printf "constant_pool_count : %s\n"
     (Uint16.to_string_hex cf.constant_pool_count);
   printf "constant_pool : %s\n"
-    (Utils.array_to_string cf.constant_pool Cp_info.to_debug_string);
+    (Utils.array_to_string cf.constant_pool Cp_info.to_string);
   printf "access_flags : %s\n" (Uint16.to_string_hex cf.access_flags);
   printf "this_class : %s\n" (Uint16.to_string_hex cf.this_class);
   printf "super_class : %s\n" (Uint16.to_string_hex cf.super_class);
