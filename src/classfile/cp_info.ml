@@ -2,30 +2,57 @@ open Printf
 open Stdint
 open Utils.Reader
 
-type t_fieldref = { class_index : uint16; name_and_type_index : uint16 }
-type t_methodref = { class_index : uint16; name_and_type_index : uint16 }
+type t_fieldref =
+  { class_index : uint16
+  ; name_and_type_index : uint16
+  }
 
-type t_interface_methodref = {
-  class_index : uint16;
-  name_and_type_index : uint16;
-}
+type t_methodref =
+  { class_index : uint16
+  ; name_and_type_index : uint16
+  }
 
-type t_long = { high_bytes : uint32; low_bytes : uint32 }
-type t_double = { high_bytes : uint32; low_bytes : uint32 }
-type t_name_and_type = { name_index : uint16; descriptor_index : uint16 }
-type t_utf8 = { length : uint16; byte_array : uint8 array }
-type t_method_handle = { reference_kind : uint8; reference_index : uint16 }
+type t_interface_methodref =
+  { class_index : uint16
+  ; name_and_type_index : uint16
+  }
+
+type t_long =
+  { high_bytes : uint32
+  ; low_bytes : uint32
+  }
+
+type t_double =
+  { high_bytes : uint32
+  ; low_bytes : uint32
+  }
+
+type t_name_and_type =
+  { name_index : uint16
+  ; descriptor_index : uint16
+  }
+
+type t_utf8 =
+  { length : uint16
+  ; byte_array : uint8 array
+  }
+
+type t_method_handle =
+  { reference_kind : uint8
+  ; reference_index : uint16
+  }
+
 type t_method_type = { descriptor_index : uint16 }
 
-type t_dynamic = {
-  bootstrap_method_attr_index : uint16;
-  name_and_type_index : uint16;
-}
+type t_dynamic =
+  { bootstrap_method_attr_index : uint16
+  ; name_and_type_index : uint16
+  }
 
-type t_invoke_dynamic = {
-  bootstrap_method_attr_index : uint16;
-  name_and_type_index : uint16;
-}
+type t_invoke_dynamic =
+  { bootstrap_method_attr_index : uint16
+  ; name_and_type_index : uint16
+  }
 
 type t =
   | Dummy

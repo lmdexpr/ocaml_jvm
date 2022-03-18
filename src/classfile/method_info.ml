@@ -1,12 +1,12 @@
 open Stdint
 open Utils.Reader
 
-type t = {
-  access_flags : uint16;
-  name_index : string;
-  descriptor_index : string;
-  attributes : Attribute_info.t array;
-}
+type t =
+  { access_flags : uint16
+  ; name_index : string
+  ; descriptor_index : string
+  ; attributes : Attribute_info.t array
+  }
 
 let read ic cp =
   let access_flags = read_u2 ic in

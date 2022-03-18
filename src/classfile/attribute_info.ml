@@ -1,21 +1,24 @@
 open Stdint
 open Utils.Reader
 
-type t_exception = {
-  start_pc : uint16;
-  end_pc : uint16;
-  handler_pc : uint16;
-  catch_type : uint16;
-}
+type t_exception =
+  { start_pc : uint16
+  ; end_pc : uint16
+  ; handler_pc : uint16
+  ; catch_type : uint16
+  }
 
-type t_line_number = { start_pc : uint16; line_number : uint16 }
+type t_line_number =
+  { start_pc : uint16
+  ; line_number : uint16
+  }
 
-type t_code = {
-  max_stack : uint16;
-  max_locals : uint16;
-  code : uint8 array;
-  exception_table : t_exception array;
-}
+type t_code =
+  { max_stack : uint16
+  ; max_locals : uint16
+  ; code : uint8 array
+  ; exception_table : t_exception array
+  }
 
 type t =
   | Code of t_code * t array

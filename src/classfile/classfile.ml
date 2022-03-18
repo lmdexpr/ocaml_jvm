@@ -6,24 +6,24 @@ module Attribute_info = Attribute_info
 module Field_info = Field_info
 module Method_info = Method_info
 
-type t = {
-  magic : uint32;
-  minor_version : uint16;
-  major_version : uint16;
-  constant_pool_count : uint16;
-  constant_pool : Cp_info.t array;
-  access_flags : uint16;
-  this_class : uint16;
-  super_class : uint16;
-  interfaces_count : uint16;
-  interfaces : uint16 array;
-  fields_count : uint16;
-  fields : Field_info.t array;
-  methods_count : uint16;
-  methods : Method_info.t array;
-  attributes_count : uint16;
-  attributes : Attribute_info.t array;
-}
+type t =
+  { magic : uint32
+  ; minor_version : uint16
+  ; major_version : uint16
+  ; constant_pool_count : uint16
+  ; constant_pool : Cp_info.t array
+  ; access_flags : uint16
+  ; this_class : uint16
+  ; super_class : uint16
+  ; interfaces_count : uint16
+  ; interfaces : uint16 array
+  ; fields_count : uint16
+  ; fields : Field_info.t array
+  ; methods_count : uint16
+  ; methods : Method_info.t array
+  ; attributes_count : uint16
+  ; attributes : Attribute_info.t array
+  }
 
 let read ic : t =
   let magic = read_u4 ic in
@@ -52,23 +52,22 @@ let read ic : t =
     Array.init (Uint16.to_int attributes_count) (fun _ ->
         Attribute_info.read ic constant_pool)
   in
-  {
-    magic;
-    minor_version;
-    major_version;
-    constant_pool_count;
-    constant_pool;
-    access_flags;
-    this_class;
-    super_class;
-    interfaces_count;
-    interfaces;
-    fields_count;
-    fields;
-    methods_count;
-    methods;
-    attributes_count;
-    attributes;
+  { magic
+  ; minor_version
+  ; major_version
+  ; constant_pool_count
+  ; constant_pool
+  ; access_flags
+  ; this_class
+  ; super_class
+  ; interfaces_count
+  ; interfaces
+  ; fields_count
+  ; fields
+  ; methods_count
+  ; methods
+  ; attributes_count
+  ; attributes
   }
 
 let debug_print cf =

@@ -2,7 +2,9 @@ open Stdint
 open Classfile
 
 module Frame = struct
-  type t = Callable of Cp_info.t * Cp_info.t * Cp_info.t | String of string
+  type t =
+    | Callable of Cp_info.t * Cp_info.t * Cp_info.t
+    | String of string
 
   let to_java_primitive = function
     | String s -> Java_libs.String s
@@ -10,23 +12,25 @@ module Frame = struct
 end
 
 module Runtime_data_area = struct
-  type t = {
-    (* todo pc_register: Frame.t; *)
-    stacks : Frame.t Stack.t;
-    (* todo heap: ???; method_area: ???; *)
-    cp : Cp_info.t array; (* todo native_method_stacks: ??? Stack.t; *)
-  }
+  type t =
+    { (* todo pc_register: Frame.t; *)
+      stacks : Frame.t Stack.t
+    ; (* todo heap: ???; method_area: ???; *)
+      cp : Cp_info.t array (* todo native_method_stacks: ??? Stack.t; *)
+    }
 
   let create cp = { stacks = Stack.create (); cp }
 end
 
-type t = { rda : Runtime_data_area.t; entry_class : Classfile.t }
+type t =
+  { rda : Runtime_data_area.t
+  ; entry_class : Classfile.t
+  }
 
 (* loader *)
 let create (class_file : Classfile.t) =
-  {
-    rda = Runtime_data_area.create class_file.constant_pool;
-    entry_class = class_file;
+  { rda = Runtime_data_area.create class_file.constant_pool
+  ; entry_class = class_file
   }
 
 let entry_point machine = machine.entry_class.methods.(1).attributes.(0)

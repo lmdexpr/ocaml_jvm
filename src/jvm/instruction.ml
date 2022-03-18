@@ -123,8 +123,8 @@ let invokevirtual machine op1 op2 =
       match get_constant_16 name_and_type_index with
       | Classfile.Cp_info.Name_and_type { name_index; descriptor_index } ->
         Classfile.Cp_info.
-          ( get_constant_16 name_index |> utf8_to_string,
-            get_constant_16 descriptor_index |> utf8_to_string )
+          ( get_constant_16 name_index |> utf8_to_string
+          , get_constant_16 descriptor_index |> utf8_to_string )
       | _ -> invalid_arg "not implemented pattern of invokevirtual"
     in
     let arguments = Str.(split (regexp ";") arguments) in

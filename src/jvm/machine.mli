@@ -2,7 +2,9 @@ open Stdint
 open Classfile
 
 module Frame : sig
-  type t = Callable of Cp_info.t * Cp_info.t * Cp_info.t | String of string
+  type t =
+    | Callable of Cp_info.t * Cp_info.t * Cp_info.t
+    | String of string
 
   val to_java_primitive : t -> Java_libs.primitive
 end
