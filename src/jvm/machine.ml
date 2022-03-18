@@ -46,17 +46,18 @@ let get_constant_8 machine byte1 byte2 =
 (* resolution *)
 let field_resolution machine c =
   let get_constant_16 = get_constant_16 machine in
-  let fieldref = Cp_info.unwrap_fieldref c |> Option.get in
-  let callee_class =
-    get_constant_16 fieldref.class_index
-    |> Cp_info.unwrap_class |> Option.get |> get_constant_16
-  and name_and_type =
-    get_constant_16 fieldref.name_and_type_index
-    |> Cp_info.unwrap_name_and_type |> Option.get
+  let open Utils.Try.Ops in
+  let* fieldref = Cp_info.unwrap_fieldref c in
+  let* class_index =
+    get_constant_16 fieldref.class_index |> Cp_info.unwrap_class
+  in
+  let callee_class = get_constant_16 class_index in
+  let* name_and_type =
+    get_constant_16 fieldref.name_and_type_index |> Cp_info.unwrap_name_and_type
   in
   let field = get_constant_16 name_and_type.name_index
   and field_type = get_constant_16 name_and_type.descriptor_index in
-  Frame.Callable (callee_class, field, field_type)
+  return @@ Frame.Callable (callee_class, field, field_type)
 
 let stack_push machine frame = Stack.push frame machine.rda.stacks
 let stack_pop machine n = List.init n (fun _ -> Stack.pop machine.rda.stacks)

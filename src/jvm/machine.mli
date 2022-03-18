@@ -26,7 +26,7 @@ val get_constant_16 : t -> Uint16.t -> Cp_info.t
 val get_constant_8 : t -> Uint8.t -> Uint8.t -> Cp_info.t
 
 (* resolution *)
-val field_resolution : t -> Cp_info.t -> Frame.t
+val field_resolution : t -> Cp_info.t -> Frame.t Utils.Try.t
 
 (* operator of stack *)
 val stack_push : t -> Frame.t -> unit

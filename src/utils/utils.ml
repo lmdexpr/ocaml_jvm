@@ -1,4 +1,9 @@
+module Import = struct
+  module Try = Try
+end
+
 module Reader = Reader
+module Try = Import.Try
 
 let array_to_string ?(prefix = "") arr f =
   "[\n"

@@ -1,4 +1,5 @@
 open Stdint
+open Utils.Import
 
 (* type *)
 type t
@@ -61,23 +62,23 @@ val unsafe_utf8_to_string : t -> string
 val to_string : t -> string
 
 (* unwrap *)
-val unwrap_class : t -> uint16 option
-val unwrap_fieldref : t -> t_fieldref option
-val unwrap_methodref : t -> t_methodref option
-val unwrap_interface_methodref : t -> t_interface_methodref option
-val unwrap_string : t -> uint16 option
-val unwrap_integer : t -> uint32 option
-val unwrap_float : t -> uint32 option
-val unwrap_long : t -> t_long option
-val unwrap_double : t -> t_double option
-val unwrap_name_and_type : t -> t_name_and_type option
-val unwrap_utf8 : t -> t_utf8 option
-val unwrap_method_handle : t -> t_method_handle option
-val unwrap_method_type : t -> t_method_type option
-val unwrap_dynamic : t -> t_dynamic option
-val unwrap_invoke_dynamic : t -> t_invoke_dynamic option
-val unwrap_module : t -> uint16 option
-val unwrap_package : t -> uint16 option
+val unwrap_class : t -> uint16 Try.t
+val unwrap_fieldref : t -> t_fieldref Try.t
+val unwrap_methodref : t -> t_methodref Try.t
+val unwrap_interface_methodref : t -> t_interface_methodref Try.t
+val unwrap_string : t -> uint16 Try.t
+val unwrap_integer : t -> uint32 Try.t
+val unwrap_float : t -> uint32 Try.t
+val unwrap_long : t -> t_long Try.t
+val unwrap_double : t -> t_double Try.t
+val unwrap_name_and_type : t -> t_name_and_type Try.t
+val unwrap_utf8 : t -> t_utf8 Try.t
+val unwrap_method_handle : t -> t_method_handle Try.t
+val unwrap_method_type : t -> t_method_type Try.t
+val unwrap_dynamic : t -> t_dynamic Try.t
+val unwrap_invoke_dynamic : t -> t_invoke_dynamic Try.t
+val unwrap_module : t -> uint16 Try.t
+val unwrap_package : t -> uint16 Try.t
 
 (* reader *)
 val read_fieldref : in_channel -> t_fieldref

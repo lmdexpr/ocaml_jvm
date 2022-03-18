@@ -1,3 +1,4 @@
+open Result
 open Printf
 open Stdint
 open Utils.Reader
@@ -74,72 +75,72 @@ type t =
   | Package of uint16
 
 let unwrap_class = function
-  | Class v -> Option.some v
-  | _ -> None
+  | Class v -> ok v
+  | _ -> error @@ Invalid_argument "unwrap_class"
 
 let unwrap_fieldref = function
-  | Fieldref v -> Option.some v
-  | _ -> None
+  | Fieldref v -> ok v
+  | _ -> error @@ Invalid_argument "unwrap_fieldref"
 
 let unwrap_methodref = function
-  | Methodref v -> Option.some v
-  | _ -> None
+  | Methodref v -> ok v
+  | _ -> error @@ Invalid_argument "unwrap_methodref"
 
 let unwrap_interface_methodref = function
-  | Interface_mehotdref v -> Option.some v
-  | _ -> None
+  | Interface_mehotdref v -> ok v
+  | _ -> error @@ Invalid_argument "unwrap_interface_methodref"
 
 let unwrap_string = function
-  | String v -> Option.some v
-  | _ -> None
+  | String v -> ok v
+  | _ -> error @@ Invalid_argument "unwrap_string"
 
 let unwrap_integer = function
-  | Integer v -> Option.some v
-  | _ -> None
+  | Integer v -> ok v
+  | _ -> error @@ Invalid_argument "unwrap_integer"
 
 let unwrap_float = function
-  | Float v -> Option.some v
-  | _ -> None
+  | Float v -> ok v
+  | _ -> error @@ Invalid_argument "unwrap_float"
 
 let unwrap_long = function
-  | Long v -> Option.some v
-  | _ -> None
+  | Long v -> ok v
+  | _ -> error @@ Invalid_argument "unwrap_long"
 
 let unwrap_double = function
-  | Double v -> Option.some v
-  | _ -> None
+  | Double v -> ok v
+  | _ -> error @@ Invalid_argument "unwrap_double"
 
 let unwrap_name_and_type = function
-  | Name_and_type v -> Option.some v
-  | _ -> None
+  | Name_and_type v -> ok v
+  | _ -> error @@ Invalid_argument "unwrap_name_and_type"
 
 let unwrap_utf8 = function
-  | Utf8 v -> Option.some v
-  | _ -> None
+  | Utf8 v -> ok v
+  | _ -> error @@ Invalid_argument "unwrap_utf8"
 
 let unwrap_method_handle = function
-  | Method_handle v -> Option.some v
-  | _ -> None
+  | Method_handle v -> ok v
+  | _ -> error @@ Invalid_argument "unwrap_method_handle"
 
 let unwrap_method_type = function
-  | Method_type v -> Option.some v
-  | _ -> None
+  | Method_type v -> ok v
+  | _ -> error @@ Invalid_argument "unwrap_method_type"
 
 let unwrap_dynamic = function
-  | Dynamic v -> Option.some v
-  | _ -> None
+  | Dynamic v -> ok v
+  | _ -> error @@ Invalid_argument "unwrap_dynamic"
 
 let unwrap_invoke_dynamic = function
-  | Invoke_dynamic v -> Option.some v
-  | _ -> None
+  | Invoke_dynamic v -> ok v
+  | _ -> error @@ Invalid_argument "unwrap_invoke_dynamic"
 
 let unwrap_module = function
-  | Module v -> Option.some v
-  | _ -> None
+  | Module v -> ok v
+  | _ -> error @@ Invalid_argument "unwrap_module"
 
 let unwrap_package = function
-  | Package v -> Option.some v
-  | _ -> None
+  | Package v -> ok v
+  | _ -> error @@ Invalid_argument "unwrap_package"
 
 (* todo : handle utf-8 *)
 let utf8_to_string v =
@@ -147,7 +148,7 @@ let utf8_to_string v =
     (fun acc byte -> acc ^ (Uint8.to_int byte |> Char.chr |> Char.escaped))
     "" v.byte_array
 
-let unsafe_utf8_to_string v = unwrap_utf8 v |> Option.get |> utf8_to_string
+let unsafe_utf8_to_string v = unwrap_utf8 v |> get_ok |> utf8_to_string
 
 let to_string = function
   | Class v -> "class " ^ Uint16.to_string v
