@@ -37,11 +37,14 @@ let read ic : t =
   let this_class = read_u2 ic in
   let super_class = read_u2 ic in
   let interfaces_count = read_u2 ic in
-  let interfaces = [||] in
   (* stub *)
+  let interfaces =
+    Array.init (Uint16.to_int interfaces_count) (fun _ -> read_u2 ic)
+  in
   let fields_count = read_u2 ic in
-  let fields = [||] in
   (* stub *)
+  (* Array.init (Uint16.to_int fields_count) (fun _ -> Field_info.read ic)*)
+  let fields = [||] in
   let methods_count = read_u2 ic in
   let methods =
     Array.init (Uint16.to_int methods_count) (fun _ ->

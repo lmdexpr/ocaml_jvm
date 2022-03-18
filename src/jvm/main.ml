@@ -14,6 +14,8 @@ let run machine =
 
 let () =
   Arg.parse spec (fun f -> class_file_name := f) "ocaml_jvm <class_file>";
-  open_in !class_file_name
-  |> unwind ~protect:close_in Classfile.read
-  |> Machine.create |> run
+  let class_file =
+    open_in !class_file_name |> unwind ~protect:close_in Classfile.read
+  in
+  Classfile.debug_print class_file;
+  run @@ Machine.create class_file

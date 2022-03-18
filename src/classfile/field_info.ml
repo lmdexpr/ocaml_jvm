@@ -9,3 +9,4 @@ type t =
   }
 
 let to_string _ = ""
+let read _ic = ()

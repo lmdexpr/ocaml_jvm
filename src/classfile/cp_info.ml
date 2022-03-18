@@ -148,8 +148,6 @@ let utf8_to_string v =
     (fun acc byte -> acc ^ (Uint8.to_int byte |> Char.chr |> Char.escaped))
     "" v.byte_array
 
-let unsafe_utf8_to_string v = unwrap_utf8 v |> get_ok |> utf8_to_string
-
 let to_string = function
   | Class v -> "class " ^ Uint16.to_string v
   | Fieldref v ->

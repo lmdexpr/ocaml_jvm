@@ -58,7 +58,6 @@ type t_invoke_dynamic =
 
 (* to_string *)
 val utf8_to_string : t_utf8 -> string
-val unsafe_utf8_to_string : t -> string
 val to_string : t -> string
 
 (* unwrap *)
