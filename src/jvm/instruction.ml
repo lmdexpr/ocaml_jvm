@@ -1,122 +1,120 @@
 open Stdint
-open Printf
 open Classfile
 open Machine
 open Utils.Try.Ops
 
-let not_implemented _ = Result.error @@ Failure "not_implemented"
-let aaload () = print_endline "aaload" |> not_implemented
-let aastore () = print_endline "aastore" |> not_implemented
-let aconst_null () = print_endline "aconst_null" |> not_implemented
-let aload index = printf "aload %x\n" (Uint8.to_int index) |> not_implemented
-let aload_ n = printf "aload_ %n\n" n |> not_implemented
-let anewarray = not_implemented ()
-let areturn = not_implemented ()
-let arraylength = not_implemented ()
-let astore = not_implemented ()
-let astore_ = not_implemented ()
-let athrow = not_implemented ()
-let baload = not_implemented ()
-let bastore = not_implemented ()
-let bipush = not_implemented ()
-let caload = not_implemented ()
-let castore = not_implemented ()
-let checkcast = not_implemented ()
-let d2f = not_implemented ()
-let d2i = not_implemented ()
-let d2l = not_implemented ()
-let dadd = not_implemented ()
-let daload = not_implemented ()
-let dastore = not_implemented ()
-let dcmpl = not_implemented ()
-let dcmpg = not_implemented ()
-let dconst_ = not_implemented ()
-let ddiv = not_implemented ()
-let dload = not_implemented ()
-let dload_ = not_implemented ()
-let dmul = not_implemented ()
-let dneg = not_implemented ()
-let drem = not_implemented ()
-let dreturn = not_implemented ()
-let dstore = not_implemented ()
-let dstore_ = not_implemented ()
-let dsub = not_implemented ()
-let dup = not_implemented ()
-let dup_x1 = not_implemented ()
-let dup_x2 = not_implemented ()
-let dup2 = not_implemented ()
-let dup2_x1 = not_implemented ()
-let dup2_x2 = not_implemented ()
-let f2d = not_implemented ()
-let f2i = not_implemented ()
-let f2l = not_implemented ()
-let fadd = not_implemented ()
-let faload = not_implemented ()
-let fastore = not_implemented ()
-let fcmpl = not_implemented ()
-let fcmpg = not_implemented ()
-let fconst_ = not_implemented ()
-let fdiv = not_implemented ()
-let fload = not_implemented ()
-let fload_ = not_implemented ()
-let fmul = not_implemented ()
-let fneg = not_implemented ()
-let frem = not_implemented ()
-let freturn = not_implemented ()
-let fstore = not_implemented ()
-let fstore_ = not_implemented ()
-let fsub = not_implemented ()
-let getfield = not_implemented ()
+let not_implemented ?(name = "") =
+  Result.error @@ Failure ("not_implemented " ^ name)
+
+let aaload = not_implemented ~name:"aaload"
+let aastore = not_implemented ~name:"aastore"
+let aconst_null = not_implemented ~name:"aconst_null"
+let aload = not_implemented ~name:"aload"
+let aload_ n = not_implemented ~name:("aload_" ^ string_of_int n)
+let anewarray = not_implemented ~name:"anewarray"
+let areturn = not_implemented ~name:"areturn"
+let arraylength = not_implemented ~name:"arraylength"
+let astore = not_implemented ~name:"astore"
+let astore_ = not_implemented ~name:"astore_"
+let athrow = not_implemented ~name:"athrow"
+let baload = not_implemented ~name:"baload"
+let bastore = not_implemented ~name:"bastore"
+let bipush = not_implemented ~name:"bipush"
+let caload = not_implemented ~name:"caload"
+let castore = not_implemented ~name:"castore"
+let checkcast = not_implemented ~name:"checkcast"
+let d2f = not_implemented ~name:"d2f"
+let d2i = not_implemented ~name:"d2i"
+let d2l = not_implemented ~name:"d2l"
+let dadd = not_implemented ~name:"dadd"
+let daload = not_implemented ~name:"daload"
+let dastore = not_implemented ~name:"dastore"
+let dcmpl = not_implemented ~name:"dcmpl"
+let dcmpg = not_implemented ~name:"dcmpg"
+let dconst_ = not_implemented ~name:"dconst_"
+let ddiv = not_implemented ~name:"ddiv"
+let dload = not_implemented ~name:"dload"
+let dload_ = not_implemented ~name:"dload_"
+let dmul = not_implemented ~name:"dmul"
+let dneg = not_implemented ~name:"dneg"
+let drem = not_implemented ~name:"drem"
+let dreturn = not_implemented ~name:"dreturn"
+let dstore = not_implemented ~name:"dstore"
+let dstore_ = not_implemented ~name:"dstore_"
+let dsub = not_implemented ~name:"dsub"
+let dup = not_implemented ~name:"dup"
+let dup_x1 = not_implemented ~name:"dup_x1"
+let dup_x2 = not_implemented ~name:"dup_x2"
+let dup2 = not_implemented ~name:"dup2"
+let dup2_x1 = not_implemented ~name:"dup2_x1"
+let dup2_x2 = not_implemented ~name:"dup2_x2"
+let f2d = not_implemented ~name:"f2d"
+let f2i = not_implemented ~name:"f2i"
+let f2l = not_implemented ~name:"f2l"
+let fadd = not_implemented ~name:"fadd"
+let faload = not_implemented ~name:"faload"
+let fastore = not_implemented ~name:"fastore"
+let fcmpl = not_implemented ~name:"fcmpl"
+let fcmpg = not_implemented ~name:"fcmpg"
+let fconst_ = not_implemented ~name:"fconst_"
+let fdiv = not_implemented ~name:"fdiv"
+let fload = not_implemented ~name:"fload"
+let fload_ = not_implemented ~name:"fload_"
+let fmul = not_implemented ~name:"fmul"
+let fneg = not_implemented ~name:"fneg"
+let frem = not_implemented ~name:"frem"
+let freturn = not_implemented ~name:"freturn"
+let fstore = not_implemented ~name:"fstore"
+let fstore_ = not_implemented ~name:"fstore_"
+let fsub = not_implemented ~name:"fsub"
+let getfield = not_implemented ~name:"getfield"
 
 let getstatic machine byte1 byte2 =
   get_constant_8 machine byte1 byte2
   |> field_resolution machine
   |> Result.map @@ stack_push machine
 
-let goto = not_implemented ()
-let goto_w = not_implemented ()
-let i2b = not_implemented ()
-let i2c = not_implemented ()
-let i2d = not_implemented ()
-let i2f = not_implemented ()
-let i2l = not_implemented ()
-let i2s = not_implemented ()
-let iadd = not_implemented ()
-let iaload = not_implemented ()
-let iand = not_implemented ()
-let iastore = not_implemented ()
-let iconst_m1 = not_implemented ()
-let iconst_ = not_implemented ()
-let idiv = not_implemented ()
-let if_acmpeq = not_implemented ()
-let if_acmpne = not_implemented ()
-let if_icmpeq = not_implemented ()
-let if_icmpne = not_implemented ()
-let if_icmplt = not_implemented ()
-let if_icmpge = not_implemented ()
-let if_icmpgt = not_implemented ()
-let if_icmple = not_implemented ()
-let ifeq = not_implemented ()
-let ifne = not_implemented ()
-let iflt = not_implemented ()
-let ifge = not_implemented ()
-let ifgt = not_implemented ()
-let ifle = not_implemented ()
-let ifnonnull = not_implemented ()
-let ifnull = not_implemented ()
-let iinc = not_implemented ()
-let iload = not_implemented ()
-let iload_ = not_implemented ()
-let imul = not_implemented ()
-let ineg = not_implemented ()
-let instanceof = not_implemented ()
-let invokedynamic = not_implemented ()
-let invokeinterface = not_implemented ()
-
-let invokespecial operand1 operand2 =
-  Printf.printf "invokespecial %x %x\n" operand1 operand2 |> not_implemented
-
-let invokestatic = not_implemented ()
+let goto = not_implemented ~name:"goto"
+let goto_w = not_implemented ~name:"goto_w"
+let i2b = not_implemented ~name:"i2b"
+let i2c = not_implemented ~name:"i2c"
+let i2d = not_implemented ~name:"i2d"
+let i2f = not_implemented ~name:"i2f"
+let i2l = not_implemented ~name:"i2l"
+let i2s = not_implemented ~name:"i2s"
+let iadd = not_implemented ~name:"iadd"
+let iaload = not_implemented ~name:"iaload"
+let iand = not_implemented ~name:"iand"
+let iastore = not_implemented ~name:"iastore"
+let iconst_m1 = not_implemented ~name:"iconst_m1"
+let iconst_ n = not_implemented ~name:("iconst_" ^ string_of_int n)
+let idiv = not_implemented ~name:"idiv"
+let if_acmpeq = not_implemented ~name:"if_acmpeq"
+let if_acmpne = not_implemented ~name:"if_acmpne"
+let if_icmpeq = not_implemented ~name:"if_icmpeq"
+let if_icmpne = not_implemented ~name:"if_icmpne"
+let if_icmplt = not_implemented ~name:"if_icmplt"
+let if_icmpge = not_implemented ~name:"if_icmpge"
+let if_icmpgt = not_implemented ~name:"if_icmpgt"
+let if_icmple = not_implemented ~name:"if_icmple"
+let ifeq = not_implemented ~name:"ifeq"
+let ifne = not_implemented ~name:"ifne"
+let iflt = not_implemented ~name:"iflt"
+let ifge = not_implemented ~name:"ifge"
+let ifgt = not_implemented ~name:"ifgt"
+let ifle = not_implemented ~name:"ifle"
+let ifnonnull = not_implemented ~name:"ifnonnull"
+let ifnull = not_implemented ~name:"ifnull"
+let iinc = not_implemented ~name:"iinc"
+let iload = not_implemented ~name:"iload"
+let iload_ = not_implemented ~name:"iload_"
+let imul = not_implemented ~name:"imul"
+let ineg = not_implemented ~name:"ineg"
+let instanceof = not_implemented ~name:"instanceof"
+let invokedynamic = not_implemented ~name:"invokedynamic"
+let invokeinterface = not_implemented ~name:"invokeinterface"
+let invokespecial _operand1 _operand2 = not_implemented ~name:"invokespecial"
+let invokestatic = not_implemented ~name:"invokestatic"
 
 let invokevirtual machine op1 op2 =
   let open Cp_info in
@@ -134,27 +132,27 @@ let invokevirtual machine op1 op2 =
   |> List.map Frame.to_java_primitive
   |> Java_libs.call method_name |> Result.ok
 
-let ior = not_implemented ()
-let irem = not_implemented ()
-let ireturn = not_implemented ()
-let ishl = not_implemented ()
-let ishr = not_implemented ()
-let istore = not_implemented ()
-let istore_ = not_implemented ()
-let isub = not_implemented ()
-let iushr = not_implemented ()
-let ixor = not_implemented ()
-let jsr = not_implemented ()
-let jsr_w = not_implemented ()
-let l2d = not_implemented ()
-let l2f = not_implemented ()
-let l2i = not_implemented ()
-let ladd = not_implemented ()
-let laload = not_implemented ()
-let land_ = not_implemented ()
-let lastore = not_implemented ()
-let lcmp = not_implemented ()
-let lconst_ = not_implemented ()
+let ior = not_implemented ~name:"ior"
+let irem = not_implemented ~name:"irem"
+let ireturn = not_implemented ~name:"ireturn"
+let ishl = not_implemented ~name:"ishl"
+let ishr = not_implemented ~name:"ishr"
+let istore = not_implemented ~name:"istore"
+let istore_ = not_implemented ~name:"istore_"
+let isub = not_implemented ~name:"isub"
+let iushr = not_implemented ~name:"iushr"
+let ixor = not_implemented ~name:"ixor"
+let jsr = not_implemented ~name:"jsr"
+let jsr_w = not_implemented ~name:"jsr_w"
+let l2d = not_implemented ~name:"l2d"
+let l2f = not_implemented ~name:"l2f"
+let l2i = not_implemented ~name:"l2i"
+let ladd = not_implemented ~name:"ladd"
+let laload = not_implemented ~name:"laload"
+let land_ = not_implemented ~name:"land_"
+let lastore = not_implemented ~name:"lastore"
+let lcmp = not_implemented ~name:"lcmp"
+let lconst_ = not_implemented ~name:"lconst_"
 
 let ldc machine operand =
   let open Cp_info in
@@ -162,53 +160,53 @@ let ldc machine operand =
   let* str = unwrap_utf8 @@ get_constant_16 machine str in
   Frame.String (utf8_to_string str) |> stack_push machine |> Result.ok
 
-let ldc_w = not_implemented ()
-let ldc2_w = not_implemented ()
-let ldiv = not_implemented ()
-let lload = not_implemented ()
-let lload_ = not_implemented ()
-let lmul = not_implemented ()
-let lneg = not_implemented ()
-let lookupswitch = not_implemented ()
-let lor_ = not_implemented ()
-let lrem = not_implemented ()
-let lreturn = not_implemented ()
-let lshl = not_implemented ()
-let lshr = not_implemented ()
-let lstore = not_implemented ()
-let lstore_ = not_implemented ()
-let lsub = not_implemented ()
-let lushr = not_implemented ()
-let lxor_ = not_implemented ()
-let monitorenter = not_implemented ()
-let monitorexit = not_implemented ()
-let multianewarray = not_implemented ()
-let new_ = not_implemented ()
-let newarray = not_implemented ()
-let nop = not_implemented ()
-let pop = not_implemented ()
-let pop2 = not_implemented ()
-let putfield = not_implemented ()
-let putstatic = not_implemented ()
-let ret = not_implemented ()
+let ldc_w = not_implemented ~name:"ldc_w"
+let ldc2_w = not_implemented ~name:"ldc2_w"
+let ldiv = not_implemented ~name:"ldiv"
+let lload = not_implemented ~name:"lload"
+let lload_ = not_implemented ~name:"lload_"
+let lmul = not_implemented ~name:"lmul"
+let lneg = not_implemented ~name:"lneg"
+let lookupswitch = not_implemented ~name:"lookupswitch"
+let lor_ = not_implemented ~name:"lor_"
+let lrem = not_implemented ~name:"lrem"
+let lreturn = not_implemented ~name:"lreturn"
+let lshl = not_implemented ~name:"lshl"
+let lshr = not_implemented ~name:"lshr"
+let lstore = not_implemented ~name:"lstore"
+let lstore_ = not_implemented ~name:"lstore_"
+let lsub = not_implemented ~name:"lsub"
+let lushr = not_implemented ~name:"lushr"
+let lxor_ = not_implemented ~name:"lxor_"
+let monitorenter = not_implemented ~name:"monitorenter"
+let monitorexit = not_implemented ~name:"monitorexit"
+let multianewarray = not_implemented ~name:"multianewarray"
+let new_ = not_implemented ~name:"new_"
+let newarray = not_implemented ~name:"newarray"
+let nop = not_implemented ~name:"nop"
+let pop = not_implemented ~name:"pop"
+let pop2 = not_implemented ~name:"pop2"
+let putfield = not_implemented ~name:"putfield"
+let putstatic = not_implemented ~name:"putstatic"
+let ret = not_implemented ~name:"ret"
 let return = Result.ok
-let saload = not_implemented ()
-let sastore = not_implemented ()
-let sipush = not_implemented ()
-let swap = not_implemented ()
-let tableswitch = not_implemented ()
-let wide = not_implemented ()
+let saload = not_implemented ~name:"saload"
+let sastore = not_implemented ~name:"sastore"
+let sipush = not_implemented ~name:"sipush"
+let swap = not_implemented ~name:"swap"
+let tableswitch = not_implemented ~name:"tableswitch"
+let wide = not_implemented ~name:"wide"
 
 let rec step (machine : t) = function
   | 0x00 :: tl -> (* nop *) step machine tl
-  | 0x01 :: _tl -> aconst_null ()
+  | 0x01 :: _tl -> aconst_null
   | 0x02 :: _tl -> iconst_m1
-  | 0x03 :: _tl -> iconst_ (*0*)
-  | 0x04 :: _tl -> iconst_ (*1*)
-  | 0x05 :: _tl -> iconst_ (*2*)
-  | 0x06 :: _tl -> iconst_ (*3*)
-  | 0x07 :: _tl -> iconst_ (*4*)
-  | 0x08 :: _tl -> iconst_ (*5*)
+  | 0x03 :: _tl -> iconst_ 0
+  | 0x04 :: _tl -> iconst_ 1
+  | 0x05 :: _tl -> iconst_ 2
+  | 0x06 :: _tl -> iconst_ 3
+  | 0x07 :: _tl -> iconst_ 4
+  | 0x08 :: _tl -> iconst_ 5
   | 0x09 :: _tl -> lconst_ (*0*)
   | 0x0a :: _tl -> lconst_ (*1*)
   | 0x0b :: _tl -> fconst_ (*0*)
@@ -225,7 +223,7 @@ let rec step (machine : t) = function
   | 0x16 :: _tl -> lload
   | 0x17 :: _tl -> fload
   | 0x18 :: _tl -> dload
-  | 0x19 :: _tl -> aload Uint8.zero
+  | 0x19 :: _tl -> aload
   | 0x1a :: _tl -> iload_ (*0*)
   | 0x1b :: _tl -> iload_ (*1*)
   | 0x1c :: _tl -> iload_ (*2*)
@@ -250,7 +248,7 @@ let rec step (machine : t) = function
   | 0x2f :: _tl -> laload
   | 0x30 :: _tl -> faload
   | 0x31 :: _tl -> daload
-  | 0x32 :: _tl -> aaload ()
+  | 0x32 :: _tl -> aaload
   | 0x33 :: _tl -> baload
   | 0x34 :: _tl -> caload
   | 0x35 :: _tl -> saload
@@ -283,7 +281,7 @@ let rec step (machine : t) = function
   | 0x50 :: _tl -> lastore
   | 0x51 :: _tl -> fastore
   | 0x52 :: _tl -> dastore
-  | 0x53 :: _tl -> aastore ()
+  | 0x53 :: _tl -> aastore
   | 0x54 :: _tl -> bastore
   | 0x55 :: _tl -> castore
   | 0x56 :: _tl -> sastore
@@ -407,11 +405,17 @@ let rec step (machine : t) = function
   | 0xc7 :: _tl -> ifnonnull
   | 0xc8 :: _tl -> goto_w
   | 0xc9 :: _tl -> jsr_w
-  | 0xca :: _tl -> print_endline "breakpoint" |> not_implemented
-  | 0xfe :: _tl -> print_endline "impdep1" |> not_implemented
-  | 0xff :: _tl -> print_endline "impdep2" |> not_implemented
-  | [] -> print_endline "nothing to run." |> not_implemented
-  | _ -> print_endline "empty opecode." |> not_implemented
+  | 0xca :: _tl ->
+    print_endline "breakpoint";
+    Result.error @@ Invalid_argument "breakpoint"
+  | 0xfe :: _tl ->
+    print_endline "impdep1";
+    Result.error @@ Invalid_argument "impdep1"
+  | 0xff :: _tl ->
+    print_endline "impdep2";
+    Result.error @@ Invalid_argument "impdep2"
+  | [] -> print_endline "nothing to run." |> Result.ok
+  | _ -> print_endline "empty opecode." |> Result.ok
 
 let step machine instructions =
   match step machine instructions with
