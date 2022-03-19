@@ -97,3 +97,12 @@ let debug_print cf =
   printf "attributes : %s\n"
     (Utils.array_to_string cf.attributes
        (Attribute_info.to_debug_string ~prefix:"  "))
+
+let rec entry_point ?(entry_point_name = "main") :
+    Method_info.t list -> Method_info.t = function
+  | hd :: tl ->
+    if hd.name_index = entry_point_name then hd
+    else entry_point ~entry_point_name tl
+  | _ -> invalid_arg "not found entry_point"
+
+let entry_point class_file = Array.to_list class_file.methods |> entry_point

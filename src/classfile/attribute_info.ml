@@ -14,9 +14,9 @@ type t_line_number =
   }
 
 type t_code =
-  { max_stack : uint16
-  ; max_locals : uint16
-  ; code : uint8 array
+  { max_stack : int
+  ; max_locals : int
+  ; code : int array
   ; exception_table : t_exception array
   }
 
@@ -106,11 +106,11 @@ let read_stack_map_frame ic =
 let rec read ic cp =
   match read_attribute_name ic cp with
   | "Code" ->
-    let max_stack = read_u2 ic in
-    let max_locals = read_u2 ic in
+    let max_stack = read_u2 ic |> Uint16.to_int in
+    let max_locals = read_u2 ic |> Uint16.to_int in
     let code_length = read_u4 ic in
     let n = Uint32.to_int code_length in
-    let code = Array.init n (fun _ -> read_u1 ic) in
+    let code = Array.init n (fun _ -> read_u1 ic |> Uint8.to_int) in
     let exception_table_length = read_u2 ic in
     let n = Uint16.to_int exception_table_length in
     let f _ =
@@ -138,7 +138,6 @@ let rec read ic cp =
   | "SourceFile" -> Source_file (read_u2 ic)
   | "StackMapTable" ->
     let n = read_u2 ic |> Uint16.to_int in
-    print_endline @@ string_of_int n;
     let entries = Array.init n (fun _ -> read_stack_map_frame ic) in
     Stack_map_table entries
   | s ->
@@ -206,16 +205,14 @@ let stack_map_frame_to_string ?(prefix = "") = function
 let rec to_debug_string ?(prefix = "") = function
   | Code (v, attributes) ->
     let s = "Code : {\n" in
+    let s = s ^ prefix ^ "  max_stack: " ^ string_of_int v.max_stack ^ ";\n" in
     let s =
-      s ^ prefix ^ "  max_stack: " ^ Uint16.to_string v.max_stack ^ ";\n"
-    in
-    let s =
-      s ^ prefix ^ "  max_locals: " ^ Uint16.to_string v.max_locals ^ ";\n"
+      s ^ prefix ^ "  max_locals: " ^ string_of_int v.max_locals ^ ";\n"
     in
     let more_nest = prefix ^ "  " in
     let s =
       s ^ prefix ^ "  code: "
-      ^ Utils.array_to_string ~prefix:more_nest v.code Uint8.to_string
+      ^ Utils.array_to_string ~prefix:more_nest v.code string_of_int
       ^ ";\n"
     in
     let e_to_s (e : t_exception) =
