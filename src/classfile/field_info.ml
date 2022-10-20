@@ -1,10 +1,10 @@
-open Stdint
+open Uint
 
 type t =
-  { access_flags : uint16
-  ; name_index : uint16
-  ; descriptor_index : uint16
-  ; attributes_count : uint16
+  { access_flags : U16.t
+  ; name_index : U16.t
+  ; descriptor_index : U16.t
+  ; attributes_count : U16.t
   ; attributes : Attribute_info.t array
   }
 

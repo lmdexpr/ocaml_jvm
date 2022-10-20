@@ -17,9 +17,8 @@
  (name ocaml_jvm)
  (synopsis "JVM implementation")
  (depends
-   ocaml
+   (ocaml (>= 5.0.0))
    ocamlformat
-   ocamlformat-rpc
    ocaml-lsp-server
    dune
    stdint))

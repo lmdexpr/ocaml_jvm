@@ -7,9 +7,8 @@ license: "MIT"
 homepage: "https://github.com/lmdexpr/ocaml_jvm"
 bug-reports: "https://github.com/lmdexpr/ocaml_jvm/issues"
 depends: [
-  "ocaml"
+  "ocaml" {>= "5.0.0"}
   "ocamlformat"
-  "ocamlformat-rpc"
   "ocaml-lsp-server"
   "dune" {>= "3.3"}
   "stdint"

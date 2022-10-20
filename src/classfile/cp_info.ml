@@ -1,68 +1,68 @@
 open Result
 open Printf
-open Stdint
+open Uint
 open Utils.Reader
 
 type t_fieldref =
-  { class_index : uint16
-  ; name_and_type_index : uint16
+  { class_index : U16.t
+  ; name_and_type_index : U16.t
   }
 
 type t_methodref =
-  { class_index : uint16
-  ; name_and_type_index : uint16
+  { class_index : U16.t
+  ; name_and_type_index : U16.t
   }
 
 type t_interface_methodref =
-  { class_index : uint16
-  ; name_and_type_index : uint16
+  { class_index : U16.t
+  ; name_and_type_index : U16.t
   }
 
 type t_long =
-  { high_bytes : uint32
-  ; low_bytes : uint32
+  { high_bytes : U32.t
+  ; low_bytes : U32.t
   }
 
 type t_double =
-  { high_bytes : uint32
-  ; low_bytes : uint32
+  { high_bytes : U32.t
+  ; low_bytes : U32.t
   }
 
 type t_name_and_type =
-  { name_index : uint16
-  ; descriptor_index : uint16
+  { name_index : U16.t
+  ; descriptor_index : U16.t
   }
 
 type t_utf8 =
-  { length : uint16
-  ; byte_array : uint8 array
+  { length : U16.t
+  ; byte_array : U8.t array
   }
 
 type t_method_handle =
-  { reference_kind : uint8
-  ; reference_index : uint16
+  { reference_kind : U8.t
+  ; reference_index : U16.t
   }
 
-type t_method_type = { descriptor_index : uint16 }
+type t_method_type = { descriptor_index : U16.t }
 
 type t_dynamic =
-  { bootstrap_method_attr_index : uint16
-  ; name_and_type_index : uint16
+  { bootstrap_method_attr_index : U16.t
+  ; name_and_type_index : U16.t
   }
 
 type t_invoke_dynamic =
-  { bootstrap_method_attr_index : uint16
-  ; name_and_type_index : uint16
+  { bootstrap_method_attr_index : U16.t
+  ; name_and_type_index : U16.t
   }
 
 type t =
-  | Class of uint16
+  | Class of U16.t
   | Fieldref of t_fieldref
   | Methodref of t_methodref
   | Interface_mehotdref of t_interface_methodref
-  | String of uint16
-  | Integer of uint32
-  | Float of uint32
+  | String of U16.t
+  | Integer of U32.t
+  | Float of U32.t
   | Long of t_long
   | Double of t_double
   | Name_and_type of t_name_and_type
@@ -71,8 +71,8 @@ type t =
   | Method_type of t_method_type
   | Dynamic of t_dynamic
   | Invoke_dynamic of t_invoke_dynamic
-  | Module of uint16
-  | Package of uint16
+  | Module of U16.t
+  | Package of U16.t
 
 let unwrap_class = function
   | Class v -> ok v
@@ -145,30 +145,30 @@ let unwrap_package = function
 (* todo : handle utf-8 *)
 let utf8_to_string v =
   Array.fold_left
-    (fun acc byte -> acc ^ (Uint8.to_int byte |> Char.chr |> Char.escaped))
+    (fun acc byte -> acc ^ (U8.to_int byte |> Char.chr |> Char.escaped))
     "" v.byte_array
 
 let to_string = function
-  | Class v -> "class " ^ Uint16.to_string v
+  | Class v -> "class " ^ U16.to_string v
   | Fieldref v ->
     sprintf "fieldref %s %s"
-      (Uint16.to_string v.class_index)
-      (Uint16.to_string v.name_and_type_index)
+      (U16.to_string v.class_index)
+      (U16.to_string v.name_and_type_index)
   | Methodref v ->
     sprintf "methodref %s %s"
-      (Uint16.to_string v.class_index)
-      (Uint16.to_string v.name_and_type_index)
+      (U16.to_string v.class_index)
+      (U16.to_string v.name_and_type_index)
   | Interface_mehotdref _ -> "interface_methodref"
-  | String v -> "string " ^ Uint16.to_string v
+  | String v -> "string " ^ U16.to_string v
   | Integer _ -> "integer"
   | Float _ -> "float"
   | Long _ -> "long"
   | Double _ -> "double"
   | Name_and_type v ->
     sprintf "name_and_type %s %s"
-      (Uint16.to_string v.name_index)
-      (Uint16.to_string v.descriptor_index)
-  | Utf8 v -> sprintf "utf8 %d %s" (Uint16.to_int v.length) (utf8_to_string v)
+      (U16.to_string v.name_index)
+      (U16.to_string v.descriptor_index)
+  | Utf8 v -> sprintf "utf8 %d %s" (U16.to_int v.length) (utf8_to_string v)
   | Method_handle _ -> "method_handle"
   | Method_type _ -> "method_type"
   | Dynamic _ -> "dynamic"
@@ -209,7 +209,7 @@ let read_name_and_type ic : t_name_and_type =
 
 let read_utf8 ic : t_utf8 =
   let len = read_u2 ic in
-  let n = Uint16.to_int len in
+  let n = U16.to_int len in
   { length = len; byte_array = Array.init n (fun _ -> read_u1 ic) }
 
 let read_method_handle ic : t_method_handle =

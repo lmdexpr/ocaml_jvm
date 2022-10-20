@@ -1,4 +1,4 @@
-open Stdint
+open Uint
 
 type t_constant_pool = Classfile.Cp_info.t array
 
@@ -15,11 +15,11 @@ let make (entry_class : Classfile.t) =
 
 (* access constant_pool *)
 let get_constant cp index = cp.(index - 1)
-let get_constant_16 cp byte = get_constant cp @@ Uint16.to_int byte
+let get_constant_16 cp byte = get_constant cp @@ U16.to_int byte
 
 let get_constant_8 cp byte1 byte2 =
-  let byte1 = Uint16.of_uint8 byte1 and byte2 = Uint16.of_uint8 byte2 in
-  get_constant_16 cp Uint16.(shift_left byte1 8 + byte2)
+  let byte1 = U16.of_u8 byte1 and byte2 = U16.of_u8 byte2 in
+  get_constant_16 cp U16.(shift_left byte1 8 + byte2)
 
 (* resolution *)
 let field_resolution cp c =

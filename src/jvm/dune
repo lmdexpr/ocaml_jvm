@@ -1,4 +1,4 @@
 (executable
  (public_name ocaml_jvm)
  (name main)
- (libraries str stdint classfile java_libs))
+ (libraries str uint classfile java_libs))
