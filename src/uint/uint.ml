@@ -11,8 +11,18 @@ module type Basics = sig
   val shift_left : t -> int -> t
 end
 
-module Make (B : Basics) = struct
-  type t = B.t
+module type With_bytes_conv = sig
+  include Basics
+
+  val length : int
+  val of_bytes_little_endian : bytes -> t
+  val of_bytes : bytes -> t
+end
+
+module Make (B : Basics) : With_bytes_conv = struct
+  include B
+
+  let length = B.bits / 8
 
   let of_bytes_little_endian buffer =
     let int_of_pos buffer offset = Char.code (Bytes.get buffer offset) in
@@ -23,7 +33,9 @@ module Make (B : Basics) = struct
         let n = B.logor (B.shift_left n 8) b in
         loop buffer (i - 1) n
     in
-    loop buffer (B.bits / 8) B.zero
+    loop buffer length B.zero
+
+  let of_bytes = of_bytes_little_endian
 end
 
 module U8 = struct
@@ -42,7 +54,6 @@ module U8 = struct
     let shift_left i offset = (i lsl offset) land 0xff
   end
 
-  include Basics
   include Make (Basics)
 end
 
@@ -62,11 +73,10 @@ module U16 = struct
     let shift_left i offset = (i lsl offset) land 0xffff
   end
 
-  include Basics
   include Make (Basics)
 
   let of_u8 u8 = U8.to_int u8 |> of_int
-  let ( + ) x y = of_int @@ (to_int x + to_int y)
+  let ( + ) x y = to_int x + to_int y |> of_int
 end
 
 module U32 = struct
@@ -87,6 +97,5 @@ module U32 = struct
     let shift_left i offset = shift_left i offset |> logand @@ of_int 0xffffffff
   end
 
-  include Basics
   include Make (Basics)
 end

@@ -1,6 +1,5 @@
 open Printf
-open Uint
-open Utils.Reader
+open Utils.Reader.Uint
 module Cp_info = Cp_info
 module Attribute_info = Attribute_info
 module Field_info = Field_info
@@ -26,29 +25,29 @@ type t =
   }
 
 let read ic : t =
-  let magic = read_u4 ic in
-  let minor_version = read_u2 ic in
-  let major_version = read_u2 ic in
-  let constant_pool_count = read_u2 ic in
+  let magic = U32.read ic in
+  let minor_version = U16.read ic in
+  let major_version = U16.read ic in
+  let constant_pool_count = U16.read ic in
   let constant_pool = U16.to_int constant_pool_count - 1 |> Cp_info.read ic in
-  let access_flags = read_u2 ic in
-  let this_class = read_u2 ic in
-  let super_class = read_u2 ic in
-  let interfaces_count = read_u2 ic in
+  let access_flags = U16.read ic in
+  let this_class = U16.read ic in
+  let super_class = U16.read ic in
+  let interfaces_count = U16.read ic in
   (* stub *)
   let interfaces =
-    Array.init (U16.to_int interfaces_count) (fun _ -> read_u2 ic)
+    Array.init (U16.to_int interfaces_count) (fun _ -> U16.read ic)
   in
-  let fields_count = read_u2 ic in
+  let fields_count = U16.read ic in
   (* stub *)
   (* Array.init (U16.to_int fields_count) (fun _ -> Field_info.read ic)*)
   let fields = [||] in
-  let methods_count = read_u2 ic in
+  let methods_count = U16.read ic in
   let methods =
     Array.init (U16.to_int methods_count) (fun _ ->
         Method_info.read ic constant_pool)
   in
-  let attributes_count = read_u2 ic in
+  let attributes_count = U16.read ic in
   let attributes =
     Array.init (U16.to_int attributes_count) (fun _ ->
         Attribute_info.read ic constant_pool)
