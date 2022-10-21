@@ -1,6 +1,5 @@
 profile = default
-version = 0.21.0
-ocaml-version=4.12.0
+ocaml-version=5.0.0
 dock-collection-brackets=false
 break-sequences=true
 doc-comments=before

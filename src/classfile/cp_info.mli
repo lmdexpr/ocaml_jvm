@@ -1,59 +1,59 @@
-open Stdint
+open Uint
 open Utils
 
 (* type *)
 type t
 
 type t_fieldref =
-  { class_index : uint16
-  ; name_and_type_index : uint16
+  { class_index : U16.t
+  ; name_and_type_index : U16.t
   }
 
 type t_methodref =
-  { class_index : uint16
-  ; name_and_type_index : uint16
+  { class_index : U16.t
+  ; name_and_type_index : U16.t
   }
 
 type t_interface_methodref =
-  { class_index : uint16
-  ; name_and_type_index : uint16
+  { class_index : U16.t
+  ; name_and_type_index : U16.t
   }
 
 type t_long =
-  { high_bytes : uint32
-  ; low_bytes : uint32
+  { high_bytes : U32.t
+  ; low_bytes : U32.t
   }
 
 type t_double =
-  { high_bytes : uint32
-  ; low_bytes : uint32
+  { high_bytes : U32.t
+  ; low_bytes : U32.t
   }
 
 type t_name_and_type =
-  { name_index : uint16
-  ; descriptor_index : uint16
+  { name_index : U16.t
+  ; descriptor_index : U16.t
   }
 
 type t_utf8 =
-  { length : uint16
-  ; byte_array : uint8 array
+  { length : U16.t
+  ; byte_array : U8.t array
   }
 
 type t_method_handle =
-  { reference_kind : uint8
-  ; reference_index : uint16
+  { reference_kind : U8.t
+  ; reference_index : U16.t
   }
 
-type t_method_type = { descriptor_index : uint16 }
+type t_method_type = { descriptor_index : U16.t }
 
 type t_dynamic =
-  { bootstrap_method_attr_index : uint16
-  ; name_and_type_index : uint16
+  { bootstrap_method_attr_index : U16.t
+  ; name_and_type_index : U16.t
   }
 
 type t_invoke_dynamic =
-  { bootstrap_method_attr_index : uint16
-  ; name_and_type_index : uint16
+  { bootstrap_method_attr_index : U16.t
+  ; name_and_type_index : U16.t
   }
 
 (* to_string *)
@@ -61,13 +61,13 @@ val utf8_to_string : t_utf8 -> string
 val to_string : t -> string
 
 (* unwrap *)
-val unwrap_class : t -> uint16 Try.t
+val unwrap_class : t -> U16.t Try.t
 val unwrap_fieldref : t -> t_fieldref Try.t
 val unwrap_methodref : t -> t_methodref Try.t
 val unwrap_interface_methodref : t -> t_interface_methodref Try.t
-val unwrap_string : t -> uint16 Try.t
-val unwrap_integer : t -> uint32 Try.t
-val unwrap_float : t -> uint32 Try.t
+val unwrap_string : t -> U16.t Try.t
+val unwrap_integer : t -> U32.t Try.t
+val unwrap_float : t -> U32.t Try.t
 val unwrap_long : t -> t_long Try.t
 val unwrap_double : t -> t_double Try.t
 val unwrap_name_and_type : t -> t_name_and_type Try.t
@@ -76,8 +76,8 @@ val unwrap_method_handle : t -> t_method_handle Try.t
 val unwrap_method_type : t -> t_method_type Try.t
 val unwrap_dynamic : t -> t_dynamic Try.t
 val unwrap_invoke_dynamic : t -> t_invoke_dynamic Try.t
-val unwrap_module : t -> uint16 Try.t
-val unwrap_package : t -> uint16 Try.t
+val unwrap_module : t -> U16.t Try.t
+val unwrap_package : t -> U16.t Try.t
 
 (* reader *)
 val read_fieldref : in_channel -> t_fieldref
