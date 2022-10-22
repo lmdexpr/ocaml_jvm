@@ -25,7 +25,7 @@ let get_constant_8 cp byte1 byte2 =
 let field_resolution cp c =
   let open Classfile.Cp_info in
   let get_constant_16 = get_constant_16 cp in
-  let open Utils.Try.Ops in
+  let ( let* ) = Result.bind in
   let* fieldref = unwrap_fieldref c in
   let* class_index = get_constant_16 fieldref.class_index |> unwrap_class in
   let callee_class = get_constant_16 class_index in

@@ -9,10 +9,10 @@ let make (entry_class : Classfile.t) =
 let current_frame machine = Stack.pop machine.rda.stack
 
 let rec invoke frame cp p code =
-  let open Utils.Try.Ops in
   let open Instruction in
   let op k = code.(p + k) in
   let cont k = invoke frame cp (p + k) code in
+  let ( >>= ) = Result.bind in
   let ( >> ) x k = x >>= fun _ -> cont k in
   match op 0 with
   | 0x00 -> nop >>= cont

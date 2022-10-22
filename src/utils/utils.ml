@@ -1,5 +1,3 @@
-module Try = Try
-
 module Reader = struct
   let read_byte ic = try Some (input_char ic) with End_of_file -> None
 

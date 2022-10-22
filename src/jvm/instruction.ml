@@ -1,8 +1,7 @@
 open Classfile
-open Utils
-open Try.Ops
 
 (* utils *)
+let ( let* ) = Result.bind
 let not_implemented ~name = Result.error @@ Failure ("not_implemented " ^ name)
 
 let to_signed byte1 byte2 =
@@ -21,7 +20,6 @@ let require_in_range ~name ~lower ~n ~upper ~f =
     in
     Result.error @@ Requirements_failed msg
 
-
 (* mnemonics *)
 let aaload _frame = not_implemented ~name:"aaload"
 let aastore _frame = not_implemented ~name:"aastore"
@@ -36,7 +34,7 @@ let astore_ _n _frame = not_implemented ~name:"astore_"
 let athrow _frame = not_implemented ~name:"athrow"
 let baload _frame = not_implemented ~name:"baload"
 let bastore _frame = not_implemented ~name:"bastore"
-let bipush frame byte = Frame.Int byte |> Frame.stack_push frame |> Try.ok
+let bipush frame byte = Frame.Int byte |> Frame.stack_push frame |> Result.ok
 let caload _frame = not_implemented ~name:"caload"
 let castore _frame = not_implemented ~name:"castore"
 let checkcast _frame _indexbyte1 _indexbyte2 = not_implemented ~name:"checkcast"
@@ -111,9 +109,10 @@ let getfield _frame _indexbyte1 _indexbyte2 = not_implemented ~name:"getfield"
 let getstatic frame cp indexbyte1 indexbyte2 =
   Runtime_data_area.get_constant_8 cp indexbyte1 indexbyte2
   |> Runtime_data_area.field_resolution cp
-  |> Try.map @@ Frame.stack_push frame
+  |> Result.map @@ Frame.stack_push frame
 
-let goto branchbyte1 branchbyte2 = to_signed branchbyte1 branchbyte2 |> Try.ok
+let goto branchbyte1 branchbyte2 =
+  to_signed branchbyte1 branchbyte2 |> Result.ok
 
 let goto_w _branchbyte1 _branchbyte2 _branchbyte3 _branchbyte4 =
   not_implemented ~name:"goto_w"
@@ -130,7 +129,7 @@ let iand _frame = not_implemented ~name:"iand"
 let iastore _frame = not_implemented ~name:"iastore"
 
 let iconst_ n frame =
-  let f () = Frame.Int n |> Frame.stack_push frame |> Try.ok in
+  let f () = Frame.Int n |> Frame.stack_push frame |> Result.ok in
   require_in_range ~name:"iconst_" ~lower:(-1) ~n ~upper:5 ~f
 
 let idiv _frame = not_implemented ~name:"idiv"
@@ -142,15 +141,15 @@ let if_icmp cond frame branchbyte1 branchbyte2 =
   let open Frame in
   match stack_pops frame 2 with
   | [ Int v2; Int v1 ] ->
-    Try.ok @@ if cond v1 v2 then to_signed branchbyte1 branchbyte2 else 3
-  | _ -> Try.error @@ Invalid_argument "by if_icmp"
+    Result.ok @@ if cond v1 v2 then to_signed branchbyte1 branchbyte2 else 3
+  | _ -> Result.error @@ Invalid_argument "by if_icmp"
 
 let if_ cond frame branchbyte1 branchbyte2 =
   let open Frame in
   match stack_pops frame 1 with
   | [ Int v ] ->
-    Try.ok @@ if cond v 0 then to_signed branchbyte1 branchbyte2 else 3
-  | _ -> Try.error @@ Invalid_argument "by if_"
+    Result.ok @@ if cond v 0 then to_signed branchbyte1 branchbyte2 else 3
+  | _ -> Result.error @@ Invalid_argument "by if_"
 
 let ifnonnull _frame _branchbyte1 _branchbyte2 =
   not_implemented ~name:"ifnonnull"
@@ -159,9 +158,9 @@ let ifnull _frame _branchbyte1 _branchbyte2 = not_implemented ~name:"ifnull"
 
 let iinc (frame : Frame.t) index const =
   match frame.locals.(index) with
-  | Int i -> Try.ok @@ (frame.locals.(index) <- Int (i + const))
+  | Int i -> Result.ok @@ (frame.locals.(index) <- Int (i + const))
   | other ->
-    Try.error @@ Invalid_argument ("iinc: " ^ Frame.local_to_string other)
+    Result.error @@ Invalid_argument ("iinc: " ^ Frame.local_to_string other)
 
 let iload _frame _index = not_implemented ~name:"iload"
 
@@ -169,8 +168,9 @@ let iload_ n frame =
   let open Frame in
   let f () =
     match frame.locals.(n) with
-    | Int value -> Try.ok @@ stack_push frame (Int value)
-    | other -> Try.error @@ Invalid_argument ("iload: " ^ local_to_string other)
+    | Int value -> Result.ok @@ stack_push frame (Int value)
+    | other ->
+      Result.error @@ Invalid_argument ("iload: " ^ local_to_string other)
   in
   require_in_range ~name:"iload_" ~lower:0 ~n ~upper:3 ~f
 
@@ -211,7 +211,7 @@ let invokevirtual frame cp op1 op2 =
   in
   List.length arguments |> Frame.stack_pops frame
   |> List.map Frame.to_java_primitive
-  |> Java_libs.call method_name |> Try.ok
+  |> Java_libs.call method_name |> Result.ok
 
 let ior _frame = not_implemented ~name:"ior"
 
@@ -219,8 +219,8 @@ let irem frame =
   let open Frame in
   match stack_pops frame 2 with
   | [ Int v2; Int v1 ] ->
-    Int (v1 - (v1 / v2 * v2)) |> stack_push frame |> Try.ok
-  | _ -> Try.error @@ Invalid_argument "irem"
+    Int (v1 - (v1 / v2 * v2)) |> stack_push frame |> Result.ok
+  | _ -> Result.error @@ Invalid_argument "irem"
 
 let ireturn _frame = not_implemented ~name:"ireturn"
 let ishl _frame = not_implemented ~name:"ishl"
@@ -231,9 +231,9 @@ let istore_ n frame =
   let open Frame in
   let f () =
     match stack_pop frame with
-    | Int value -> Try.ok @@ (frame.locals.(n) <- Int value)
+    | Int value -> Result.ok @@ (frame.locals.(n) <- Int value)
     | other ->
-      Try.error
+      Result.error
       @@ Invalid_argument ("istore: top of stack is " ^ operand_to_string other)
   in
   require_in_range ~name:"istore_" ~lower:0 ~n ~upper:3 ~f
@@ -264,7 +264,7 @@ let ldc frame cp index =
   let open Cp_info in
   let* str = unwrap_string @@ get_constant cp index in
   let* str = unwrap_utf8 @@ get_constant_16 cp str in
-  Frame.String (utf8_to_string str) |> Frame.stack_push frame |> Try.ok
+  Frame.String (utf8_to_string str) |> Frame.stack_push frame |> Result.ok
 
 let ldc_w _frame _cp _indexbyte1 _indexbyte2 = not_implemented ~name:"ldc_w"
 let ldc2_w _frame _cp _indexbyte1 _indexbyte2 = not_implemented ~name:"ldc2_w"
@@ -300,13 +300,13 @@ let multianewarray _frame _indexbyte1 _indexbyte2 _dimensions =
 
 let new_ _frame _indexbyte1 _indexbyte2 = not_implemented ~name:"new_"
 let newarray _frame _atype = not_implemented ~name:"newarray"
-let nop = Try.ok 1
+let nop = Result.ok 1
 let pop _frame = not_implemented ~name:"pop"
 let pop2 _frame = not_implemented ~name:"pop2"
 let putfield _frame _indexbyte1 _indexbyte2 = not_implemented ~name:"putfield"
 let putstatic _frame _indexbyte1 _indexbyte2 = not_implemented ~name:"putstatic"
 let ret _frame _index = not_implemented ~name:"ret"
-let return = Try.ok
+let return = Result.ok
 let saload _frame = not_implemented ~name:"saload"
 let sastore _frame = not_implemented ~name:"sastore"
 let sipush _frame _byte1 _byte2 = not_implemented ~name:"sipush"
