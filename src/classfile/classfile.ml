@@ -72,7 +72,7 @@ let read ic : t =
 let rec entry_point ?(entry_point_name = "main") :
     Method_info.t list -> Method_info.t = function
   | hd :: tl ->
-    if hd.name_index = entry_point_name then hd
+    if hd.name = entry_point_name then hd
     else entry_point ~entry_point_name tl
   | _ -> invalid_arg "not found entry_point"
 
