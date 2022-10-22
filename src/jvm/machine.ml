@@ -9,10 +9,10 @@ let make (entry_class : Classfile.t) =
 let current_frame machine = Stack.pop machine.rda.stack
 
 let rec invoke frame cp p code =
-  let open Utils.Try.Ops in
   let open Instruction in
   let op k = code.(p + k) in
   let cont k = invoke frame cp (p + k) code in
+  let ( >>= ) = Result.bind in
   let ( >> ) x k = x >>= fun _ -> cont k in
   match op 0 with
   | 0x00 -> nop >>= cont
@@ -194,14 +194,14 @@ let rec invoke frame cp p code =
   | 0xb0 -> areturn frame
   | 0xb1 -> return ()
   | 0xb2 ->
-    let open Uint in
+    let open Ubytes in
     let op1 = U8.of_int (op 1) and op2 = U8.of_int (op 2) in
     getstatic frame cp op1 op2 >> 3
   | 0xb3 -> putstatic frame (op 1) (op 2) >> 3
   | 0xb4 -> getfield frame (op 1) (op 2) >> 3
   | 0xb5 -> putfield frame (op 1) (op 2) >> 3
   | 0xb6 ->
-    let open Uint in
+    let open Ubytes in
     let op1 = U8.of_int (op 1) and op2 = U8.of_int (op 2) in
     invokevirtual frame cp op1 op2 >> 3
   | 0xb7 -> invokespecial frame (op 1) (op 2) >> 3

@@ -1,5 +1,4 @@
-open Uint
-open Utils
+open Ubytes
 
 (* type *)
 type t
@@ -61,23 +60,23 @@ val utf8_to_string : t_utf8 -> string
 val to_string : t -> string
 
 (* unwrap *)
-val unwrap_class : t -> U16.t Try.t
-val unwrap_fieldref : t -> t_fieldref Try.t
-val unwrap_methodref : t -> t_methodref Try.t
-val unwrap_interface_methodref : t -> t_interface_methodref Try.t
-val unwrap_string : t -> U16.t Try.t
-val unwrap_integer : t -> U32.t Try.t
-val unwrap_float : t -> U32.t Try.t
-val unwrap_long : t -> t_long Try.t
-val unwrap_double : t -> t_double Try.t
-val unwrap_name_and_type : t -> t_name_and_type Try.t
-val unwrap_utf8 : t -> t_utf8 Try.t
-val unwrap_method_handle : t -> t_method_handle Try.t
-val unwrap_method_type : t -> t_method_type Try.t
-val unwrap_dynamic : t -> t_dynamic Try.t
-val unwrap_invoke_dynamic : t -> t_invoke_dynamic Try.t
-val unwrap_module : t -> U16.t Try.t
-val unwrap_package : t -> U16.t Try.t
+val unwrap_class : t -> (U16.t, exn) result
+val unwrap_fieldref : t -> (t_fieldref, exn) result
+val unwrap_methodref : t -> (t_methodref, exn) result
+val unwrap_interface_methodref : t -> (t_interface_methodref, exn) result
+val unwrap_string : t -> (U16.t, exn) result
+val unwrap_integer : t -> (U32.t, exn) result
+val unwrap_float : t -> (U32.t, exn) result
+val unwrap_long : t -> (t_long, exn) result
+val unwrap_double : t -> (t_double, exn) result
+val unwrap_name_and_type : t -> (t_name_and_type, exn) result
+val unwrap_utf8 : t -> (t_utf8, exn) result
+val unwrap_method_handle : t -> (t_method_handle, exn) result
+val unwrap_method_type : t -> (t_method_type, exn) result
+val unwrap_dynamic : t -> (t_dynamic, exn) result
+val unwrap_invoke_dynamic : t -> (t_invoke_dynamic, exn) result
+val unwrap_module : t -> (U16.t, exn) result
+val unwrap_package : t -> (U16.t, exn) result
 
 (* reader *)
 val read_fieldref : in_channel -> t_fieldref
