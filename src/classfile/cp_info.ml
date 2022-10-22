@@ -1,7 +1,6 @@
 open Result
 open Printf
-open Utils.Reader
-open Uint
+open Ubytes.Reader
 
 type t_fieldref =
   { class_index : U16.t

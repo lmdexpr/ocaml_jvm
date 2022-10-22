@@ -1,4 +1,4 @@
-open Uint
+open Ubytes.Uint
 
 type t =
   { access_flags : U16.t

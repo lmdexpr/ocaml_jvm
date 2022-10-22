@@ -1,4 +1,4 @@
-open Uint
+open Ubytes.Uint
 
 let array_to_debug_string ?(prefix = "") arr f =
   "[\n"

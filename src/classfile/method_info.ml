@@ -1,4 +1,4 @@
-open Utils.Reader.Uint
+open Ubytes.Reader
 
 type t =
   { access_flags : U16.t

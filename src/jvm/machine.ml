@@ -194,14 +194,14 @@ let rec invoke frame cp p code =
   | 0xb0 -> areturn frame
   | 0xb1 -> return ()
   | 0xb2 ->
-    let open Uint in
+    let open Ubytes.Uint in
     let op1 = U8.of_int (op 1) and op2 = U8.of_int (op 2) in
     getstatic frame cp op1 op2 >> 3
   | 0xb3 -> putstatic frame (op 1) (op 2) >> 3
   | 0xb4 -> getfield frame (op 1) (op 2) >> 3
   | 0xb5 -> putfield frame (op 1) (op 2) >> 3
   | 0xb6 ->
-    let open Uint in
+    let open Ubytes.Uint in
     let op1 = U8.of_int (op 1) and op2 = U8.of_int (op 2) in
     invokevirtual frame cp op1 op2 >> 3
   | 0xb7 -> invokespecial frame (op 1) (op 2) >> 3

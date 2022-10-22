@@ -1,4 +1,4 @@
-open Utils.Reader.Uint
+open Ubytes.Reader
 module Cp_info = Cp_info
 module Attribute_info = Attribute_info
 module Field_info = Field_info
@@ -101,8 +101,7 @@ module Debug = struct
       (array_to_debug_string cf.fields Field_info.to_string);
     printf "methods_count : %d\n" (U16.to_int cf.methods_count);
     printf "methods : %s\n"
-      (array_to_debug_string cf.methods
-         (Method_info.to_string ~prefix:"  "));
+      (array_to_debug_string cf.methods (Method_info.to_string ~prefix:"  "));
     printf "attributes_count : %d\n" (U16.to_int cf.attributes_count);
     printf "attributes : %s\n"
       (array_to_debug_string cf.attributes

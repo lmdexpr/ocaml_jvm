@@ -1,4 +1,4 @@
-open Utils.Reader.Uint
+open Ubytes.Reader
 
 type t_exception =
   { start_pc : U16.t
