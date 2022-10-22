@@ -44,7 +44,7 @@ let read ic : t =
   let methods_count = U16.read ic in
   let methods =
     Array.init (U16.to_int methods_count) (fun _ ->
-        Method_info.read ic constant_pool)
+        Result.get_ok @@ Method_info.read ic constant_pool)
   in
   let attributes_count = U16.read ic in
   let attributes =
@@ -72,8 +72,7 @@ let read ic : t =
 let rec entry_point ?(entry_point_name = "main") :
     Method_info.t list -> Method_info.t = function
   | hd :: tl ->
-    if hd.name = entry_point_name then hd
-    else entry_point ~entry_point_name tl
+    if hd.name = entry_point_name then hd else entry_point ~entry_point_name tl
   | _ -> invalid_arg "not found entry_point"
 
 let entry_point class_file = Array.to_list class_file.methods |> entry_point
