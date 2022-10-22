@@ -1,4 +1,4 @@
-open Ubytes.Uint
+open Ubytes
 
 type t_constant_pool = Classfile.Cp_info.t array
 

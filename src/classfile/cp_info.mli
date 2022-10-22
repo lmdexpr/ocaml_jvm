@@ -1,4 +1,4 @@
-open Ubytes.Uint
+open Ubytes
 
 (* type *)
 type t
