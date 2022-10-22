@@ -1,4 +1,3 @@
-open Printf
 open Utils.Reader.Uint
 module Cp_info = Cp_info
 module Attribute_info = Attribute_info
@@ -70,29 +69,6 @@ let read ic : t =
   ; attributes
   }
 
-let debug_print cf =
-  printf "magic : %s\n" (U32.to_string_hex cf.magic);
-  printf "minor_version : %s\n" (U16.to_string_hex cf.minor_version);
-  printf "major_version : %s\n" (U16.to_string_hex cf.major_version);
-  printf "constant_pool_count : %s\n" (U16.to_string_hex cf.constant_pool_count);
-  printf "constant_pool : %s\n"
-    (Utils.array_to_string cf.constant_pool Cp_info.to_string);
-  printf "access_flags : %s\n" (U16.to_string_hex cf.access_flags);
-  printf "this_class : %s\n" (U16.to_string_hex cf.this_class);
-  printf "super_class : %s\n" (U16.to_string_hex cf.super_class);
-  printf "interfaces_count : %d\n" (U16.to_int cf.interfaces_count);
-  printf "interfaces : %s\n" (Utils.array_to_string cf.interfaces U16.to_string);
-  printf "fields_count : %d\n" (U16.to_int cf.fields_count);
-  printf "fields : %s\n" (Utils.array_to_string cf.fields Field_info.to_string);
-  printf "methods_count : %d\n" (U16.to_int cf.methods_count);
-  printf "methods : %s\n"
-    (Utils.array_to_string cf.methods
-       (Method_info.to_debug_string ~prefix:"  "));
-  printf "attributes_count : %d\n" (U16.to_int cf.attributes_count);
-  printf "attributes : %s\n"
-    (Utils.array_to_string cf.attributes
-       (Attribute_info.to_debug_string ~prefix:"  "))
-
 let rec entry_point ?(entry_point_name = "main") :
     Method_info.t list -> Method_info.t = function
   | hd :: tl ->
@@ -101,3 +77,34 @@ let rec entry_point ?(entry_point_name = "main") :
   | _ -> invalid_arg "not found entry_point"
 
 let entry_point class_file = Array.to_list class_file.methods |> entry_point
+
+module Debug = struct
+  open Printf
+  include Debug
+
+  let print_classfile cf =
+    printf "magic : %s\n" (U32.to_string_hex cf.magic);
+    printf "minor_version : %s\n" (U16.to_string_hex cf.minor_version);
+    printf "major_version : %s\n" (U16.to_string_hex cf.major_version);
+    printf "constant_pool_count : %s\n"
+      (U16.to_string_hex cf.constant_pool_count);
+    printf "constant_pool : %s\n"
+      (array_to_debug_string cf.constant_pool Cp_info.to_string);
+    printf "access_flags : %s\n" (U16.to_string_hex cf.access_flags);
+    printf "this_class : %s\n" (U16.to_string_hex cf.this_class);
+    printf "super_class : %s\n" (U16.to_string_hex cf.super_class);
+    printf "interfaces_count : %d\n" (U16.to_int cf.interfaces_count);
+    printf "interfaces : %s\n"
+      (array_to_debug_string cf.interfaces U16.to_string);
+    printf "fields_count : %d\n" (U16.to_int cf.fields_count);
+    printf "fields : %s\n"
+      (array_to_debug_string cf.fields Field_info.to_string);
+    printf "methods_count : %d\n" (U16.to_int cf.methods_count);
+    printf "methods : %s\n"
+      (array_to_debug_string cf.methods
+         (Method_info.to_string ~prefix:"  "));
+    printf "attributes_count : %d\n" (U16.to_int cf.attributes_count);
+    printf "attributes : %s\n"
+      (array_to_debug_string cf.attributes
+         (Attribute_info.to_string ~prefix:"  "))
+end

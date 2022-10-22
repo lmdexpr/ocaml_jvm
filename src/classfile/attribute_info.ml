@@ -30,6 +30,19 @@ type t_verification_type_info =
   | Object_variable_info of U16.t
   | Uninitialized_variable_info of U16.t
 
+let verification_type_info_to_string = function
+  | Top_variable_info -> "Top_variable_info"
+  | Integer_variable_info -> "Integer_variable_info"
+  | Float_variable_info -> "Float_variable_info"
+  | Long_variable_info -> "Long_variable_info"
+  | Double_variable_info -> "Double_variable_info"
+  | Null_variable_info -> "Null_variable_info"
+  | UninitializedThis_variable_info -> "UninitializedThis_variable_info"
+  | Object_variable_info idx ->
+    "Object_variable_info: { " ^ U16.to_string idx ^ " }"
+  | Uninitialized_variable_info offset ->
+    "Uninitialized_variable_info: { " ^ U16.to_string offset ^ " }"
+
 type t_full_frame =
   { offset_delta : U16.t
   ; locals : t_verification_type_info array
@@ -142,104 +155,3 @@ let rec read ic cp =
   | s ->
     print_endline @@ "not implemented read_attribute " ^ s;
     Not_implemented
-
-let verification_type_info_to_string = function
-  | Top_variable_info -> "Top_variable_info"
-  | Integer_variable_info -> "Integer_variable_info"
-  | Float_variable_info -> "Float_variable_info"
-  | Long_variable_info -> "Long_variable_info"
-  | Double_variable_info -> "Double_variable_info"
-  | Null_variable_info -> "Null_variable_info"
-  | UninitializedThis_variable_info -> "UninitializedThis_variable_info"
-  | Object_variable_info idx ->
-    "Object_variable_info: { " ^ U16.to_string idx ^ " }"
-  | Uninitialized_variable_info offset ->
-    "Uninitialized_variable_info: { " ^ U16.to_string offset ^ " }"
-
-let stack_map_frame_to_string ?(prefix = "") = function
-  | Same_frame -> "Same_frame"
-  | Same_locals_1_stack_item_frame i ->
-    "Same_locals_1_stack_item_frame: { "
-    ^ verification_type_info_to_string i
-    ^ " }\n"
-  | Same_locals_1_stack_item_frame_extended (d, i) ->
-    "Same_locals_1_stack_item_frame_extended: { " ^ U16.to_string d ^ "; "
-    ^ verification_type_info_to_string i
-    ^ " }\n"
-  | Chop_frame d -> "Chop_frame: { " ^ U16.to_string d ^ " }\n"
-  | Same_frame_extended d ->
-    "Same_frame_extended: { " ^ U16.to_string d ^ " }\n"
-  | Append_frame (offset_delta, locals) ->
-    let s = "Full_frame : {\n" in
-    let s =
-      s ^ prefix ^ "  offset_delta: " ^ U16.to_string offset_delta ^ ";\n"
-    in
-    let prefix = prefix ^ "  " in
-    let s =
-      s ^ prefix ^ "  locals: "
-      ^ Utils.array_to_string ~prefix locals verification_type_info_to_string
-      ^ ";\n"
-    in
-    s
-  | Full_frame { offset_delta; locals; stack } ->
-    let s = prefix ^ "Full_frame : {\n" in
-    let s =
-      s ^ prefix ^ "  offset_delta: " ^ U16.to_string offset_delta ^ ";\n"
-    in
-    let more_nest = prefix ^ "  " in
-    let s =
-      s ^ prefix ^ "  locals: "
-      ^ Utils.array_to_string ~prefix:more_nest locals
-          verification_type_info_to_string
-      ^ ";\n"
-    in
-    let s =
-      s ^ prefix ^ "  stack: "
-      ^ Utils.array_to_string ~prefix:more_nest stack
-          verification_type_info_to_string
-      ^ ";\n"
-    in
-    s ^ prefix ^ "}"
-
-let rec to_debug_string ?(prefix = "") = function
-  | Code (v, attributes) ->
-    let s = "Code : {\n" in
-    let s = s ^ prefix ^ "  max_stack: " ^ string_of_int v.max_stack ^ ";\n" in
-    let s =
-      s ^ prefix ^ "  max_locals: " ^ string_of_int v.max_locals ^ ";\n"
-    in
-    let more_nest = prefix ^ "  " in
-    let s =
-      s ^ prefix ^ "  code: "
-      ^ Utils.array_to_string ~prefix:more_nest v.code string_of_int
-      ^ ";\n"
-    in
-    let e_to_s (e : t_exception) =
-      "{ start_pc: " ^ U16.to_string e.start_pc ^ "; end_pc: "
-      ^ U16.to_string e.end_pc ^ "; handler_pc: " ^ U16.to_string e.handler_pc
-      ^ "; catch_type: " ^ U16.to_string e.catch_type ^ ";}"
-    in
-    let s =
-      s ^ prefix ^ "  exception_table: "
-      ^ Utils.array_to_string ~prefix:more_nest v.exception_table e_to_s
-      ^ ";\n"
-    in
-    let s =
-      s ^ prefix ^ "  attributes: "
-      ^ Utils.array_to_string ~prefix:more_nest attributes
-          (to_debug_string ~prefix:(more_nest ^ "  "))
-      ^ ";\n"
-    in
-    s ^ prefix ^ "}"
-  | Line_number_table v ->
-    "LineNumberTable : "
-    ^ Utils.array_to_string ~prefix v (fun e ->
-          "{ start_pc: " ^ U16.to_string e.start_pc ^ "; line_number: "
-          ^ U16.to_string e.line_number
-          ^ " }")
-  | Source_file v -> "SourceFile : { " ^ U16.to_string v ^ " }"
-  | Stack_map_table v ->
-    "StackMapTable: "
-    ^ Utils.array_to_string ~prefix v
-        (stack_map_frame_to_string ~prefix:(prefix ^ "  "))
-  | Not_implemented -> "NOT IMPLEMENTED"

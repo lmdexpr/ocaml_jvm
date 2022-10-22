@@ -27,18 +27,3 @@ let read ic cp =
     Array.init attributes_count (fun _ -> Attribute_info.read ic cp)
   in
   { access_flags; name_index; descriptor_index; attributes }
-
-let to_debug_string ?(prefix = "") mi =
-  let s = "{\n" in
-  let s =
-    s ^ prefix ^ "  access_flags: " ^ U16.to_string mi.access_flags ^ ";\n"
-  in
-  let s = s ^ prefix ^ "  name_index: " ^ mi.name_index ^ ";\n" in
-  let s = s ^ prefix ^ "  descriptor_index: " ^ mi.descriptor_index ^ ";\n" in
-  let s =
-    s ^ prefix ^ "  attributes: "
-    ^ Utils.array_to_string ~prefix:(prefix ^ "  ") mi.attributes
-        (Attribute_info.to_debug_string ~prefix:(prefix ^ "    "))
-    ^ ";\n"
-  in
-  s ^ prefix ^ "}"
