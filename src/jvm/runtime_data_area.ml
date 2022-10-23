@@ -34,4 +34,4 @@ let field_resolution cp c =
   in
   let field = get_constant_16 name_and_type.name_index
   and field_type = get_constant_16 name_and_type.descriptor_index in
-  Result.ok @@ Frame.Callable (callee_class, field, field_type)
+  Result.ok @@ `Callable (callee_class, field, field_type)

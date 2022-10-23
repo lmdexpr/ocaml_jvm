@@ -1,13 +1,14 @@
 type primitive =
-  | String of string
-  | Int of int
-  | Not_implemented
+  [ `String of string
+  | `Int of int
+  | `Not_implemented
+  ]
 
 type 'a java_method = primitive list -> 'a
 
 let routing mtd = function
-  | String s :: _ -> mtd s
-  | Int i :: _ -> mtd @@ string_of_int i
+  | `String s :: _ -> mtd s
+  | `Int i :: _ -> mtd @@ string_of_int i
   | [] -> invalid_arg "empty arguments"
   | _ -> invalid_arg "print_stream#println"
 
