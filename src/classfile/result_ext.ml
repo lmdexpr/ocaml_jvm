@@ -11,5 +11,9 @@ let rec n_bind f acc = function
     let* v = f () in
     n_bind f (v :: acc) (n - 1)
 
-let n_bind ~n ~f = Result.map Array.of_list @@ n_bind f [] n
+let n_bind ~n ~f =
+  let* xs = n_bind f [] n in
+  let arr = List.rev xs |> Array.of_list in
+  Result.ok arr
+
 let try_with ~f = try Result.ok @@ f () with e -> Result.error e
