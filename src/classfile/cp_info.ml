@@ -2,6 +2,8 @@ open Result
 open Printf
 open Ubytes.Reader
 
+type t_class = U16.t
+
 type t_fieldref =
   { class_index : U16.t
   ; name_and_type_index : U16.t
@@ -16,6 +18,10 @@ type t_interface_methodref =
   { class_index : U16.t
   ; name_and_type_index : U16.t
   }
+
+type t_string = U16.t
+type t_integer = U32.t
+type t_float = U32.t
 
 type t_long =
   { high_bytes : U32.t
@@ -54,14 +60,17 @@ type t_invoke_dynamic =
   ; name_and_type_index : U16.t
   }
 
+type t_module = U16.t
+type t_package = U16.t
+
 type t =
-  | Class of U16.t
+  | Class of t_class
   | Fieldref of t_fieldref
   | Methodref of t_methodref
   | Interface_mehotdref of t_interface_methodref
-  | String of U16.t
-  | Integer of U32.t
-  | Float of U32.t
+  | String of t_string
+  | Integer of t_integer
+  | Float of t_float
   | Long of t_long
   | Double of t_double
   | Name_and_type of t_name_and_type
@@ -70,8 +79,8 @@ type t =
   | Method_type of t_method_type
   | Dynamic of t_dynamic
   | Invoke_dynamic of t_invoke_dynamic
-  | Module of U16.t
-  | Package of U16.t
+  | Module of t_module
+  | Package of t_package
 
 let unwrap_class = function
   | Class v -> ok v
@@ -175,60 +184,62 @@ let to_string = function
   | Module _ -> "module"
   | Package _ -> "package"
 
-(* reader *)
-let read_fieldref ic : t_fieldref =
-  let class_index = U16.read ic in
-  let name_and_type_index = U16.read ic in
-  { class_index; name_and_type_index }
+open struct
+  (* read functions *)
+  let read_fieldref ic : t_fieldref =
+    let class_index = U16.read ic in
+    let name_and_type_index = U16.read ic in
+    { class_index; name_and_type_index }
 
-let read_methodref ic : t_methodref =
-  let class_index = U16.read ic in
-  let name_and_type_index = U16.read ic in
-  { class_index; name_and_type_index }
+  let read_methodref ic : t_methodref =
+    let class_index = U16.read ic in
+    let name_and_type_index = U16.read ic in
+    { class_index; name_and_type_index }
 
-let read_interface_methodref ic : t_interface_methodref =
-  let class_index = U16.read ic in
-  let name_and_type_index = U16.read ic in
-  { class_index; name_and_type_index }
+  let read_interface_methodref ic : t_interface_methodref =
+    let class_index = U16.read ic in
+    let name_and_type_index = U16.read ic in
+    { class_index; name_and_type_index }
 
-let read_long ic : t_long =
-  let high_bytes = U32.read ic in
-  let low_bytes = U32.read ic in
-  { high_bytes; low_bytes }
+  let read_long ic : t_long =
+    let high_bytes = U32.read ic in
+    let low_bytes = U32.read ic in
+    { high_bytes; low_bytes }
 
-let read_double ic : t_double =
-  let high_bytes = U32.read ic in
-  let low_bytes = U32.read ic in
-  { high_bytes; low_bytes }
+  let read_double ic : t_double =
+    let high_bytes = U32.read ic in
+    let low_bytes = U32.read ic in
+    { high_bytes; low_bytes }
 
-let read_name_and_type ic : t_name_and_type =
-  let name_index = U16.read ic in
-  let descriptor_index = U16.read ic in
-  { name_index; descriptor_index }
+  let read_name_and_type ic : t_name_and_type =
+    let name_index = U16.read ic in
+    let descriptor_index = U16.read ic in
+    { name_index; descriptor_index }
 
-let read_utf8 ic : t_utf8 =
-  let len = U16.read ic in
-  let n = U16.to_int len in
-  { length = len; byte_array = Array.init n (fun _ -> U8.read ic) }
+  let read_utf8 ic : t_utf8 =
+    let len = U16.read ic in
+    let n = U16.to_int len in
+    { length = len; byte_array = Array.init n (fun _ -> U8.read ic) }
 
-let read_method_handle ic : t_method_handle =
-  let reference_kind = U8.read ic in
-  let reference_index = U16.read ic in
-  { reference_kind; reference_index }
+  let read_method_handle ic : t_method_handle =
+    let reference_kind = U8.read ic in
+    let reference_index = U16.read ic in
+    { reference_kind; reference_index }
 
-let read_method_type ic : t_method_type = { descriptor_index = U16.read ic }
+  let read_method_type ic : t_method_type = { descriptor_index = U16.read ic }
 
-let read_dynamic ic : t_dynamic =
-  let bootstrap_method_attr_index = U16.read ic in
-  let name_and_type_index = U16.read ic in
-  { bootstrap_method_attr_index; name_and_type_index }
+  let read_dynamic ic : t_dynamic =
+    let bootstrap_method_attr_index = U16.read ic in
+    let name_and_type_index = U16.read ic in
+    { bootstrap_method_attr_index; name_and_type_index }
 
-let read_invoke_dynamic ic : t_invoke_dynamic =
-  let bootstrap_method_attr_index = U16.read ic in
-  let name_and_type_index = U16.read ic in
-  { bootstrap_method_attr_index; name_and_type_index }
+  let read_invoke_dynamic ic : t_invoke_dynamic =
+    let bootstrap_method_attr_index = U16.read ic in
+    let name_and_type_index = U16.read ic in
+    { bootstrap_method_attr_index; name_and_type_index }
 
-exception Illegal_constant_pool_tag
+  exception Illegal_constant_pool_tag
+end
 
 let read ic =
   match read_byte ic |> Option.get |> int_of_char with
