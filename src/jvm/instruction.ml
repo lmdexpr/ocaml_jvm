@@ -209,8 +209,8 @@ let invokevirtual frame cp op1 op2 =
     | Delim "(" :: Text s :: Delim ")" :: _ -> split (regexp_string ";") s
     | _ -> invalid_arg @@ utf8_to_string arguments
   in
-  List.length arguments |> Frame.stack_pops frame
-  |> Java_libs.call method_name |> Result.ok
+  List.length arguments |> Frame.stack_pops frame |> Java_libs.call method_name
+  |> Result.ok
 
 let ior _frame = not_implemented ~name:"ior"
 
