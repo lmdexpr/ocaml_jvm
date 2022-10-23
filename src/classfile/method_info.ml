@@ -8,7 +8,7 @@ type t =
   }
 
 let read ic cp =
-  let ( let* ) = Result.bind in
+  let open Result_ext.Ops in
   let access_flags = U16.read ic in
   let name_index = (U16.read ic |> U16.to_int) - 1 in
   let* name = Cp_info.unwrap_utf8 cp.(name_index) in
@@ -18,7 +18,7 @@ let read ic cp =
   let descriptor = Cp_info.utf8_to_string descriptor in
   let attributes_count = U16.read ic in
   let attributes_count = U16.to_int attributes_count in
-  let attributes =
-    Array.init attributes_count (fun _ -> Attribute_info.read ic cp)
+  let* attributes =
+    Result_ext.n_bind attributes_count (fun _ -> Attribute_info.read ic cp)
   in
   Result.ok { access_flags; name; descriptor; attributes }

@@ -13,7 +13,9 @@ let unwind ~(protect : 'a -> unit) f x =
 let () =
   Arg.parse spec (fun f -> class_file_name := f) "ocaml_jvm <class_file>";
   let entry_class =
-    open_in !class_file_name |> unwind Classfile.read ~protect:close_in
+    open_in !class_file_name
+    |> unwind Classfile.read ~protect:close_in
+    |> Result.get_ok
   in
   let entry_point = Classfile.entry_point entry_class in
   match Machine.make entry_class |> Machine.invoke entry_point with
