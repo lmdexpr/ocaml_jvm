@@ -19,6 +19,7 @@ let read ic cp =
   let attributes_count = U16.read ic in
   let attributes_count = U16.to_int attributes_count in
   let* attributes =
-    Result_ext.n_bind attributes_count (fun _ -> Attribute_info.read ic cp)
+    let f _ = Attribute_info.read ic cp in
+    Result_ext.n_bind ~n:attributes_count ~f
   in
   Result.ok { access_flags; name; descriptor; attributes }

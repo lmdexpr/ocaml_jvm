@@ -45,12 +45,12 @@ let read ic =
   let methods_count = U16.read ic in
   let n = U16.to_int methods_count in
   let* methods =
-    Result_ext.n_bind n @@ fun _ -> Method_info.read ic constant_pool
+    Result_ext.n_bind ~n ~f:(fun _ -> Method_info.read ic constant_pool)
   in
   let attributes_count = U16.read ic in
   let n = U16.to_int attributes_count in
   let* attributes =
-    Result_ext.n_bind n @@ fun _ -> Attribute_info.read ic constant_pool
+    Result_ext.n_bind ~n ~f:(fun _ -> Attribute_info.read ic constant_pool)
   in
   Result.ok
     { magic

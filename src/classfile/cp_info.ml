@@ -230,7 +230,7 @@ let read_invoke_dynamic ic : t_invoke_dynamic =
 
 exception Illegal_constant_pool_tag
 
-let read ic _ =
+let read ic =
   match read_byte ic |> Option.get |> int_of_char with
   | 7 -> Class (U16.read ic)
   | 9 -> Fieldref (read_fieldref ic)
@@ -251,4 +251,7 @@ let read ic _ =
   | 20 -> Package (U16.read ic)
   | _ -> raise Illegal_constant_pool_tag
 
-let read ic n = Result_ext.n_bind n @@ fun _ -> Result_ext.try_with (read ic)
+let read ic n =
+  let read _ = read ic in
+  let f _ = Result_ext.try_with ~f:read in
+  Result_ext.n_bind ~n ~f

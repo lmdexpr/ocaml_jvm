@@ -108,22 +108,17 @@ let read_stack_map_frame ic =
   | n when n <= 254 ->
     let u16 = U16.read ic in
     let* arr =
-      Result_ext.n_bind (frame_type - 251) (fun _ ->
-          read_verification_type_info ic)
+      let n = n - 251 and f _ = read_verification_type_info ic in
+      Result_ext.n_bind ~n ~f
     in
     Result.ok @@ Append_frame (u16, arr)
   | 255 ->
+    let f _ = read_verification_type_info ic in
     let offset_delta = U16.read ic in
     let number_of_locals = U16.read ic |> U16.to_int in
-    let* locals =
-      Result_ext.n_bind number_of_locals (fun _ ->
-          read_verification_type_info ic)
-    in
+    let* locals = Result_ext.n_bind ~n:number_of_locals ~f in
     let number_of_stack_items = U16.read ic |> U16.to_int in
-    let* stack =
-      Result_ext.n_bind number_of_stack_items (fun _ ->
-          read_verification_type_info ic)
-    in
+    let* stack = Result_ext.n_bind ~n:number_of_stack_items ~f in
     Result.ok @@ Full_frame { offset_delta; locals; stack }
   | _ -> Result.error @@ invalid_arg "read_stack_map_frame : out of range"
 
@@ -146,7 +141,10 @@ let rec read ic cp =
     in
     let exception_table = Array.init exception_table_length f in
     let attributes_count = U16.read ic |> U16.to_int in
-    let* attributes = Result_ext.n_bind attributes_count (fun _ -> read ic cp) in
+    let* attributes =
+      let f _ = read ic cp in
+      Result_ext.n_bind ~n:attributes_count ~f
+    in
     let code = { max_stack; max_locals; code; exception_table } in
     Result.ok @@ Code (code, attributes)
   | "LineNumberTable" ->
@@ -160,7 +158,8 @@ let rec read ic cp =
   | "SourceFile" -> Result.ok @@ Source_file (U16.read ic)
   | "StackMapTable" ->
     let n = U16.read ic |> U16.to_int in
-    let* entries = Result_ext.n_bind n (fun _ -> read_stack_map_frame ic) in
+    let f _ = read_stack_map_frame ic in
+    let* entries = Result_ext.n_bind ~n ~f in
     Result.ok @@ Stack_map_table entries
   | s ->
     print_endline @@ "not implemented read_attribute " ^ s;
