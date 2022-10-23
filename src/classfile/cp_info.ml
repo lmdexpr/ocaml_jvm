@@ -230,26 +230,28 @@ let read_invoke_dynamic ic : t_invoke_dynamic =
 
 exception Illegal_constant_pool_tag
 
-let read ic n : t array =
-  let f _ =
-    match read_byte ic |> Option.get |> int_of_char with
-    | 7 -> Class (U16.read ic)
-    | 9 -> Fieldref (read_fieldref ic)
-    | 10 -> Methodref (read_methodref ic)
-    | 11 -> Interface_mehotdref (read_interface_methodref ic)
-    | 8 -> String (U16.read ic)
-    | 3 -> Integer (U32.read ic)
-    | 4 -> Float (U32.read ic)
-    | 5 -> Long (read_long ic)
-    | 6 -> Double (read_double ic)
-    | 12 -> Name_and_type (read_name_and_type ic)
-    | 1 -> Utf8 (read_utf8 ic)
-    | 15 -> Method_handle (read_method_handle ic)
-    | 16 -> Method_type (read_method_type ic)
-    | 17 -> Dynamic (read_dynamic ic)
-    | 18 -> Invoke_dynamic (read_invoke_dynamic ic)
-    | 19 -> Module (U16.read ic)
-    | 20 -> Package (U16.read ic)
-    | _ -> raise Illegal_constant_pool_tag
-  in
-  Array.init n f
+let read ic =
+  match read_byte ic |> Option.get |> int_of_char with
+  | 7 -> Class (U16.read ic)
+  | 9 -> Fieldref (read_fieldref ic)
+  | 10 -> Methodref (read_methodref ic)
+  | 11 -> Interface_mehotdref (read_interface_methodref ic)
+  | 8 -> String (U16.read ic)
+  | 3 -> Integer (U32.read ic)
+  | 4 -> Float (U32.read ic)
+  | 5 -> Long (read_long ic)
+  | 6 -> Double (read_double ic)
+  | 12 -> Name_and_type (read_name_and_type ic)
+  | 1 -> Utf8 (read_utf8 ic)
+  | 15 -> Method_handle (read_method_handle ic)
+  | 16 -> Method_type (read_method_type ic)
+  | 17 -> Dynamic (read_dynamic ic)
+  | 18 -> Invoke_dynamic (read_invoke_dynamic ic)
+  | 19 -> Module (U16.read ic)
+  | 20 -> Package (U16.read ic)
+  | _ -> raise Illegal_constant_pool_tag
+
+let read ic n =
+  let read _ = read ic in
+  let f _ = Result_ext.try_with ~f:read in
+  Result_ext.n_bind ~n ~f

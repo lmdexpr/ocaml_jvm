@@ -107,8 +107,8 @@ module Method_info = struct
     let s =
       s ^ prefix ^ "  access_flags: " ^ U16.to_string mi.access_flags ^ ";\n"
     in
-    let s = s ^ prefix ^ "  name_index: " ^ mi.name_index ^ ";\n" in
-    let s = s ^ prefix ^ "  descriptor_index: " ^ mi.descriptor_index ^ ";\n" in
+    let s = s ^ prefix ^ "  name: " ^ mi.name ^ ";\n" in
+    let s = s ^ prefix ^ "  descriptor: " ^ mi.descriptor ^ ";\n" in
     let s =
       s ^ prefix ^ "  attributes: "
       ^ array_to_debug_string ~prefix:(prefix ^ "  ") mi.attributes

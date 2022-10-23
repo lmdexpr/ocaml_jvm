@@ -66,65 +66,72 @@ type t =
   | Not_implemented
 
 let read_attribute_name ic cp =
-  let attribute_name_index = U16.read ic in
+  let attribute_name_index = U16.read ic |> U16.to_int in
   let _attribute_length = U32.read ic in
-  cp.(U16.to_int attribute_name_index - 1)
-  |> Cp_info.unwrap_utf8
-  |> Result.fold ~ok:Cp_info.utf8_to_string ~error:raise
+  Cp_info.unwrap_utf8 cp.(attribute_name_index - 1)
+  |> Result.map Cp_info.utf8_to_string
 
 let read_verification_type_info ic =
-  match U8.read ic |> U8.to_int with
-  | 0 -> Top_variable_info
-  | 1 -> Integer_variable_info
-  | 2 -> Float_variable_info
-  | 3 -> Long_variable_info
-  | 4 -> Double_variable_info
-  | 5 -> Null_variable_info
-  | 6 -> UninitializedThis_variable_info
-  | 7 -> Object_variable_info (U16.read ic)
-  | 8 -> Uninitialized_variable_info (U16.read ic)
-  | _ -> invalid_arg "read_verification_type_info: out of range"
+  try
+    Result.ok
+    @@
+    match U8.read ic |> U8.to_int with
+    | 0 -> Top_variable_info
+    | 1 -> Integer_variable_info
+    | 2 -> Float_variable_info
+    | 3 -> Long_variable_info
+    | 4 -> Double_variable_info
+    | 5 -> Null_variable_info
+    | 6 -> UninitializedThis_variable_info
+    | 7 -> Object_variable_info (U16.read ic)
+    | 8 -> Uninitialized_variable_info (U16.read ic)
+    | _ -> invalid_arg "read_verification_type_info: out of range"
+  with e -> Result.error e
 
 let read_stack_map_frame ic =
+  let open Result_ext.Ops in
   let frame_type = U8.read ic |> U8.to_int in
-  if 0 <= frame_type && frame_type <= 63 then Same_frame
-  else if frame_type <= 127 then
-    Same_locals_1_stack_item_frame (read_verification_type_info ic)
-  else if frame_type <= 246 then
-    failwith "read_stack_map_frame : reserved for future use"
-  else if frame_type = 247 then
-    Same_locals_1_stack_item_frame_extended
-      (U16.read ic, read_verification_type_info ic)
-  else if frame_type <= 250 then Chop_frame (U16.read ic)
-  else if frame_type = 251 then Same_frame_extended (U16.read ic)
-  else if frame_type <= 254 then
-    Append_frame
-      ( U16.read ic
-      , Array.init (frame_type - 251) (fun _ -> read_verification_type_info ic)
-      )
-  else if frame_type = 255 then
+  match frame_type with
+  | n when 0 <= n && n <= 63 -> Result.ok Same_frame
+  | n when n <= 127 ->
+    Result.map (fun v -> Same_locals_1_stack_item_frame v)
+    @@ read_verification_type_info ic
+  | n when n <= 246 ->
+    Result.error @@ invalid_arg "read_stack_map_frame : reserved for future use"
+  | 247 ->
+    let u16 = U16.read ic in
+    let* verification_type_info = read_verification_type_info ic in
+    Result.ok
+    @@ Same_locals_1_stack_item_frame_extended (u16, verification_type_info)
+  | n when n <= 250 -> Result.ok @@ Chop_frame (U16.read ic)
+  | 251 -> Result.ok @@ Same_frame_extended (U16.read ic)
+  | n when n <= 254 ->
+    let u16 = U16.read ic in
+    let* arr =
+      let n = n - 251 and f _ = read_verification_type_info ic in
+      Result_ext.n_bind ~n ~f
+    in
+    Result.ok @@ Append_frame (u16, arr)
+  | 255 ->
+    let f _ = read_verification_type_info ic in
     let offset_delta = U16.read ic in
     let number_of_locals = U16.read ic |> U16.to_int in
-    let locals =
-      Array.init number_of_locals (fun _ -> read_verification_type_info ic)
-    in
+    let* locals = Result_ext.n_bind ~n:number_of_locals ~f in
     let number_of_stack_items = U16.read ic |> U16.to_int in
-    let stack =
-      Array.init number_of_stack_items (fun _ -> read_verification_type_info ic)
-    in
-    Full_frame { offset_delta; locals; stack }
-  else invalid_arg "read_stack_map_frame : out of range"
+    let* stack = Result_ext.n_bind ~n:number_of_stack_items ~f in
+    Result.ok @@ Full_frame { offset_delta; locals; stack }
+  | _ -> Result.error @@ invalid_arg "read_stack_map_frame : out of range"
 
 let rec read ic cp =
-  match read_attribute_name ic cp with
+  let open Result_ext.Ops in
+  let* attribute_name = read_attribute_name ic cp in
+  match attribute_name with
   | "Code" ->
-    let max_stack = U16.read ic |> U16.to_int in
-    let max_locals = U16.read ic |> U16.to_int in
-    let code_length = U32.read ic in
-    let n = U32.to_int code_length in
-    let code = Array.init n (fun _ -> U8.read ic |> U8.to_int) in
-    let exception_table_length = U16.read ic in
-    let n = U16.to_int exception_table_length in
+    let max_stack = U16.read ic |> U16.to_int
+    and max_locals = U16.read ic |> U16.to_int
+    and code_length = U32.read ic |> U32.to_int in
+    let code = Array.init code_length (fun _ -> U8.read ic |> U8.to_int) in
+    let exception_table_length = U16.read ic |> U16.to_int in
     let f _ =
       let start_pc = U16.read ic in
       let end_pc = U16.read ic in
@@ -132,26 +139,28 @@ let rec read ic cp =
       let catch_type = U16.read ic in
       { start_pc; end_pc; handler_pc; catch_type }
     in
-    let exception_table = Array.init n f in
-    let attributes_count = U16.read ic in
-    let attributes_count = U16.to_int attributes_count in
-    let attributes = Array.init attributes_count (fun _ -> read ic cp) in
+    let exception_table = Array.init exception_table_length f in
+    let attributes_count = U16.read ic |> U16.to_int in
+    let* attributes =
+      let f _ = read ic cp in
+      Result_ext.n_bind ~n:attributes_count ~f
+    in
     let code = { max_stack; max_locals; code; exception_table } in
-    Code (code, attributes)
+    Result.ok @@ Code (code, attributes)
   | "LineNumberTable" ->
-    let line_number_table_length = U16.read ic in
-    let n = U16.to_int line_number_table_length in
+    let line_number_table_length = U16.read ic |> U16.to_int in
     let f _ =
       let start_pc = U16.read ic in
       let line_number = U16.read ic in
       { start_pc; line_number }
     in
-    Line_number_table (Array.init n f)
-  | "SourceFile" -> Source_file (U16.read ic)
+    Result.ok @@ Line_number_table (Array.init line_number_table_length f)
+  | "SourceFile" -> Result.ok @@ Source_file (U16.read ic)
   | "StackMapTable" ->
     let n = U16.read ic |> U16.to_int in
-    let entries = Array.init n (fun _ -> read_stack_map_frame ic) in
-    Stack_map_table entries
+    let f _ = read_stack_map_frame ic in
+    let* entries = Result_ext.n_bind ~n ~f in
+    Result.ok @@ Stack_map_table entries
   | s ->
     print_endline @@ "not implemented read_attribute " ^ s;
-    Not_implemented
+    Result.ok Not_implemented

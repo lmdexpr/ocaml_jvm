@@ -90,4 +90,4 @@ val read_method_handle : in_channel -> t_method_handle
 val read_method_type : in_channel -> t_method_type
 val read_dynamic : in_channel -> t_dynamic
 val read_invoke_dynamic : in_channel -> t_invoke_dynamic
-val read : in_channel -> int -> t array
+val read : in_channel -> int -> (t array, exn) result

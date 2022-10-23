@@ -23,12 +23,13 @@ type t =
   ; attributes : Attribute_info.t array
   }
 
-let read ic : t =
+let read ic =
+  let open Result_ext.Ops in
   let magic = U32.read ic in
   let minor_version = U16.read ic in
   let major_version = U16.read ic in
   let constant_pool_count = U16.read ic in
-  let constant_pool = U16.to_int constant_pool_count - 1 |> Cp_info.read ic in
+  let* constant_pool = U16.to_int constant_pool_count - 1 |> Cp_info.read ic in
   let access_flags = U16.read ic in
   let this_class = U16.read ic in
   let super_class = U16.read ic in
@@ -42,38 +43,38 @@ let read ic : t =
   (* Array.init (U16.to_int fields_count) (fun _ -> Field_info.read ic)*)
   let fields = [||] in
   let methods_count = U16.read ic in
-  let methods =
-    Array.init (U16.to_int methods_count) (fun _ ->
-        Method_info.read ic constant_pool)
+  let n = U16.to_int methods_count in
+  let* methods =
+    Result_ext.n_bind ~n ~f:(fun _ -> Method_info.read ic constant_pool)
   in
   let attributes_count = U16.read ic in
-  let attributes =
-    Array.init (U16.to_int attributes_count) (fun _ ->
-        Attribute_info.read ic constant_pool)
+  let n = U16.to_int attributes_count in
+  let* attributes =
+    Result_ext.n_bind ~n ~f:(fun _ -> Attribute_info.read ic constant_pool)
   in
-  { magic
-  ; minor_version
-  ; major_version
-  ; constant_pool_count
-  ; constant_pool
-  ; access_flags
-  ; this_class
-  ; super_class
-  ; interfaces_count
-  ; interfaces
-  ; fields_count
-  ; fields
-  ; methods_count
-  ; methods
-  ; attributes_count
-  ; attributes
-  }
+  Result.ok
+    { magic
+    ; minor_version
+    ; major_version
+    ; constant_pool_count
+    ; constant_pool
+    ; access_flags
+    ; this_class
+    ; super_class
+    ; interfaces_count
+    ; interfaces
+    ; fields_count
+    ; fields
+    ; methods_count
+    ; methods
+    ; attributes_count
+    ; attributes
+    }
 
 let rec entry_point ?(entry_point_name = "main") :
     Method_info.t list -> Method_info.t = function
   | hd :: tl ->
-    if hd.name_index = entry_point_name then hd
-    else entry_point ~entry_point_name tl
+    if hd.name = entry_point_name then hd else entry_point ~entry_point_name tl
   | _ -> invalid_arg "not found entry_point"
 
 let entry_point class_file = Array.to_list class_file.methods |> entry_point
