@@ -20,5 +20,4 @@
    (ocaml (>= 5.0.0))
    ocamlformat
    ocaml-lsp-server
-   dune
-   stdint))
+   dune))
