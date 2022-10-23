@@ -1,6 +1,8 @@
 module Ops = struct
   let ( let* ) = Result.bind
   let ( and* ) = Result.bind
+  let ( let+ ) x k = Result.map k x
+  let ( and+ ) x k = Result.map k x
 end
 
 open Ops

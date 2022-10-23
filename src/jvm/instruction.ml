@@ -2,6 +2,7 @@ open Classfile
 
 (* utils *)
 let ( let* ) = Result.bind
+let ( let+ ) x k = Result.map k x
 let not_implemented ~name = Result.error @@ Failure ("not_implemented " ^ name)
 
 let to_signed byte1 byte2 =
@@ -202,7 +203,7 @@ let invokevirtual frame cp op1 op2 =
   in
   let* method_name = get_constant_16 name_index |> unwrap_utf8 in
   let method_name = utf8_to_string method_name in
-  let* arguments = get_constant_16 descriptor_index |> unwrap_utf8 in
+  let+ arguments = get_constant_16 descriptor_index |> unwrap_utf8 in
   let arguments =
     let open Str in
     match utf8_to_string arguments |> full_split (regexp "[()]") with
@@ -210,7 +211,6 @@ let invokevirtual frame cp op1 op2 =
     | _ -> invalid_arg @@ utf8_to_string arguments
   in
   List.length arguments |> Frame.stack_pops frame |> Java_libs.call method_name
-  |> Result.ok
 
 let ior _frame = not_implemented ~name:"ior"
 
@@ -262,8 +262,8 @@ let ldc frame cp index =
   let open Runtime_data_area in
   let open Cp_info in
   let* str = unwrap_string @@ get_constant cp index in
-  let* str = unwrap_utf8 @@ get_constant_16 cp str in
-  `String (utf8_to_string str) |> Frame.stack_push frame |> Result.ok
+  let+ str = unwrap_utf8 @@ get_constant_16 cp str in
+  `String (utf8_to_string str) |> Frame.stack_push frame
 
 let ldc_w _frame _cp _indexbyte1 _indexbyte2 = not_implemented ~name:"ldc_w"
 let ldc2_w _frame _cp _indexbyte1 _indexbyte2 = not_implemented ~name:"ldc2_w"

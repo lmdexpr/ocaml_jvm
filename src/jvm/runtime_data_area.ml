@@ -26,12 +26,13 @@ let field_resolution cp c =
   let open Classfile.Cp_info in
   let get_constant_16 = get_constant_16 cp in
   let ( let* ) = Result.bind in
+  let ( let+ ) x k = Result.map k x in
   let* fieldref = unwrap_fieldref c in
   let* class_index = get_constant_16 fieldref.class_index |> unwrap_class in
   let callee_class = get_constant_16 class_index in
-  let* name_and_type =
+  let+ name_and_type =
     get_constant_16 fieldref.name_and_type_index |> unwrap_name_and_type
   in
   let field = get_constant_16 name_and_type.name_index
   and field_type = get_constant_16 name_and_type.descriptor_index in
-  Result.ok @@ `Callable (callee_class, field, field_type)
+  `Callable (callee_class, field, field_type)
