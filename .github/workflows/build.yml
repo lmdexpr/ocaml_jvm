@@ -15,32 +15,16 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-
-      - name: install opam
-        run: |
-          sudo add-apt-repository ppa:avsm/ppa
-          sudo apt update
-          sudo apt install opam
-
-      - name: restore cache
-        uses: actions/cache@v2
+      - uses: cachix/install-nix-action@v6
+      - uses: cachix/cachix-action@v2
         with:
-          path: _opam
-          key: opam-${{ hashFiles('ocaml_jvm.opam') }}
-          restore-keys: opam-
+          name: ocamljvm
+          signingKey: '${{ secrets.CACHIX_SIGNING_KEY }}'
 
-      - name: opam init (use cache)
-        continue-on-error: true
-        run: |
-          opam init --auto-setup --bare --enable-shell-hook
-          opam switch create . --no-install 5.0.0~beta1
-
-      - name: opam install (use cache)
-        run: |
-          opam install . --deps-only --yes
+      - run: nix-build
 
       - name: exec HelloWorld
-        run: opam exec -- dune exec ocaml_jvm java_src/HelloWorld.class
+        run: nix-shell --run "dune exec ocaml_jvm java_src/HelloWorld.class"
 
       - name: exec FizzBuzz
-        run: opam exec -- dune exec ocaml_jvm java_src/FizzBuzz.class
+        run: nix-shell --run "dune exec ocaml_jvm java_src/FizzBuzz.class"
