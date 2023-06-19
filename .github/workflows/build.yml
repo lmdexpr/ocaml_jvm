@@ -15,16 +15,20 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-      - uses: cachix/install-nix-action@v6
+
+      - uses: cachix/install-nix-action@v20
+
       - uses: cachix/cachix-action@v2
         with:
           name: ocamljvm
           signingKey: '${{ secrets.CACHIX_SIGNING_KEY }}'
 
-      - run: nix-build
+      - run: nix build
+
+      - run: nix develop
 
       - name: exec HelloWorld
-        run: nix-shell --run "dune exec ocaml_jvm java_src/HelloWorld.class"
+        run: dune exec ocaml_jvm java_src/HelloWorld.class
 
       - name: exec FizzBuzz
-        run: nix-shell --run "dune exec ocaml_jvm java_src/FizzBuzz.class"
+        run: dune exec ocaml_jvm java_src/FizzBuzz.class
