@@ -18,10 +18,10 @@ jobs:
 
       - uses: cachix/install-nix-action@v20
 
-      - run: nix develop
+      - run: nix build
 
       - name: exec HelloWorld
-        run: dune exec ocaml_jvm java_src/HelloWorld.class
+        run: nix develop --command dune exec ocaml_jvm java_src/HelloWorld.class
 
       - name: exec FizzBuzz
-        run: dune exec ocaml_jvm java_src/FizzBuzz.class
+        run: nix develop --command dune exec ocaml_jvm java_src/FizzBuzz.class
