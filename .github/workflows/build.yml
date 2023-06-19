@@ -18,13 +18,6 @@ jobs:
 
       - uses: cachix/install-nix-action@v20
 
-      - uses: cachix/cachix-action@v2
-        with:
-          name: ocamljvm
-          signingKey: '${{ secrets.CACHIX_SIGNING_KEY }}'
-
-      - run: nix build
-
       - run: nix develop
 
       - name: exec HelloWorld
